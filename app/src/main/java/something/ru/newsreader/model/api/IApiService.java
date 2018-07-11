@@ -1,16 +1,18 @@
 package something.ru.newsreader.model.api;
 
+import java.util.List;
+
 import io.reactivex.Single;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
-import something.ru.newsreader.model.api.entity.NewsContentResponse;
-import something.ru.newsreader.model.api.entity.NewsResponse;
-import something.ru.newsreader.model.database.entity.News;
+import something.ru.newsreader.model.entity.ApiResponse;
+import something.ru.newsreader.model.entity.News;
+import something.ru.newsreader.model.entity.NewsContent;
 
 public interface IApiService {
     @GET("news")
-    Single<NewsResponse<News>> getAllNews();
+    Single<ApiResponse<List<News>>> getAllNews();
 
     @GET("news_content")
-    Single<NewsContentResponse> getNewsContent(@Query("id") int id);
+    Single<ApiResponse<NewsContent>> getNewsContent(@Query("id") String id);
 }

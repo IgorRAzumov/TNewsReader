@@ -8,7 +8,7 @@ import com.google.gson.JsonParseException;
 
 import java.lang.reflect.Type;
 
-import something.ru.newsreader.model.database.entity.News;
+import something.ru.newsreader.model.entity.News;
 
 public class NewsDeserializer implements JsonDeserializer<News> {
     private static final String ERROR_JSON_CONTAINS_MEMBER = "News json don`t contains needed fields";

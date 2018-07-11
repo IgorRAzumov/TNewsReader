@@ -1,4 +1,4 @@
-package something.ru.newsreader.model.database.entity;
+package something.ru.newsreader.model.entity;
 
 import io.realm.RealmObject;
 import io.realm.annotations.Index;

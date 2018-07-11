@@ -16,8 +16,10 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import something.ru.newsreader.model.api.IApiService;
+import something.ru.newsreader.model.api.deserializers.NewsContentDeserializer;
 import something.ru.newsreader.model.api.deserializers.NewsDeserializer;
-import something.ru.newsreader.model.database.entity.News;
+import something.ru.newsreader.model.entity.News;
+import something.ru.newsreader.model.entity.NewsContent;
 
 
 @Module
@@ -83,9 +85,12 @@ public class ApiModule {
 
     @Provides
     public Gson gson(@Named("newsType") Type newsType,
-                     @Named("newsDeserializer") JsonDeserializer<News> deserializer) {
+                     @Named("newsDeserializer") JsonDeserializer<News> newsDeserializer,
+                     @Named("newsContentType") Type newsContentType,
+                     @Named("newsContentDeserializer") JsonDeserializer<NewsContent> contentDeserializer) {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(newsType, deserializer);
+        gsonBuilder.registerTypeAdapter(newsType, newsDeserializer);
+        gsonBuilder.registerTypeAdapter(newsContentType, contentDeserializer);
         return gsonBuilder.create();
     }
 
@@ -99,6 +104,18 @@ public class ApiModule {
     @Provides
     public JsonDeserializer<News> newsDeserializer() {
         return new NewsDeserializer();
+    }
+
+    @Named("newsContentType")
+    @Provides
+    public Type newsContentType() {
+        return NewsContent.class;
+    }
+
+    @Named("newsContentDeserializer")
+    @Provides
+    public JsonDeserializer<NewsContent> newsContentDeserializer() {
+        return new NewsContentDeserializer();
     }
 
 

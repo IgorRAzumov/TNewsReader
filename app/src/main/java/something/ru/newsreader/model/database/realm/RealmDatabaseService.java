@@ -8,8 +8,8 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import something.ru.newsreader.model.database.IDatabaseService;
-import something.ru.newsreader.model.database.entity.News;
-import something.ru.newsreader.model.database.entity.NewsContent;
+import something.ru.newsreader.model.entity.News;
+import something.ru.newsreader.model.entity.NewsContent;
 
 public class RealmDatabaseService implements IDatabaseService {
 

@@ -1,18 +1,22 @@
-package something.ru.newsreader.model.api.entity;
+package something.ru.newsreader.model.entity;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class NewsContentResponse {
-    @SerializedName("title")
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
+public class NewsContent extends RealmObject {
+    @PrimaryKey
+    @SerializedName("news")
     @Expose
-    private NewsTitle title;
+    private String newsId;
     @SerializedName("creationDate")
     @Expose
-    private PublicationDate creationDate;
+    private Long creationDate;
     @SerializedName("lastModificationDate")
     @Expose
-    private PublicationDate lastModificationDate;
+    private Long lastModificationDate;
     @SerializedName("content")
     @Expose
     private String content;
@@ -23,20 +27,28 @@ public class NewsContentResponse {
     @Expose
     private String typeId;
 
-    public NewsTitle getTitle() {
-        return title;
+    public String getId() {
+        return newsId;
     }
 
-    public PublicationDate getCreationDate() {
+    public String getNewsId() {
+        return newsId;
+    }
+
+    public Long getCreationDate() {
         return creationDate;
     }
 
-    public PublicationDate getLastModificationDate() {
+    public Long getLastModificationDate() {
         return lastModificationDate;
     }
 
     public String getContent() {
         return content;
+    }
+
+    public void setId(String id) {
+        this.newsId = id;
     }
 
     public void setContent(String content) {
@@ -57,5 +69,13 @@ public class NewsContentResponse {
 
     public void setTypeId(String typeId) {
         this.typeId = typeId;
+    }
+
+    public void setLastModificationDate(Long lastModificationDate) {
+        this.lastModificationDate = lastModificationDate;
+    }
+
+    public void setCreationDate(Long creationDate) {
+        this.creationDate = creationDate;
     }
 }

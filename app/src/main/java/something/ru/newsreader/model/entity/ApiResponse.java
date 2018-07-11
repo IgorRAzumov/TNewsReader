@@ -1,17 +1,15 @@
-package something.ru.newsreader.model.api.entity;
+package something.ru.newsreader.model.entity;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
-
-public class NewsResponse<T> {
+public class ApiResponse<T> {
     @SerializedName("resultCode")
     @Expose
     private String resultCode;
     @SerializedName("payload")
     @Expose
-    private List<T> payload;
+    private T payload;
     @SerializedName("trackingId")
     @Expose
     private String trackingId;
@@ -24,11 +22,11 @@ public class NewsResponse<T> {
         this.resultCode = resultCode;
     }
 
-    public List<T> getPayload() {
+    public T getPayload() {
         return payload;
     }
 
-    public void setPayload(List<T> payload) {
+    public void setPayload(T payload) {
         this.payload = payload;
     }
 
