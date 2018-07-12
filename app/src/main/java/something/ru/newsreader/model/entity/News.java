@@ -1,25 +1,31 @@
 package something.ru.newsreader.model.entity;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import io.realm.RealmObject;
-import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
 public class News extends RealmObject {
     @PrimaryKey
+    @SerializedName("id")
+    @Expose
     private String id;
-    @Index
-    private String newsId;
+    @SerializedName("name")
+    @Expose
     private String name;
+    @SerializedName("text")
+    @Expose
     private String text;
+    @SerializedName("publicationDate")
+    @Expose
     private Long publicationDate;
+    @SerializedName("bankInfoTypeId")
+    @Expose
     private Integer bankInfoTypeId;
 
     public String getId() {
         return id;
-    }
-
-    public String getNewsId() {
-        return newsId;
     }
 
     public String getName() {
@@ -40,10 +46,6 @@ public class News extends RealmObject {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public void setNewsId(String newsId) {
-        this.newsId = newsId;
     }
 
     public void setName(String name) {

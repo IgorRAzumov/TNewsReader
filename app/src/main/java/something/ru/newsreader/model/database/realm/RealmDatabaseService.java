@@ -3,7 +3,6 @@ package something.ru.newsreader.model.database.realm;
 import java.util.List;
 
 import io.reactivex.Completable;
-import io.reactivex.Maybe;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -15,49 +14,36 @@ public class RealmDatabaseService implements IDatabaseService {
 
     @Override
     public RealmResults<News> getNews() {
-        RealmResults<News> realmNews;
         Realm realm = Realm.getDefaultInstance();
-        realmNews = realm
+        return realm
                 .where(News.class)
                 .sort("publicationDate", Sort.DESCENDING)
                 .findAll();
-
-        return realmNews;
     }
 
     @Override
     public Completable insertOrUpdateNews(List<News> newsList) {
-        return Completable.fromAction(() -> {
+        return Completable.create((completableEmitter) -> {
             Realm realm = Realm.getDefaultInstance();
             realm.executeTransaction(innerRealm -> {
                 realm.insertOrUpdate(newsList);
             });
+            completableEmitter.onComplete();
         });
     }
 
     @Override
-    public NewsContent getNewsContent(int newsId) {
-        return null;
+    public NewsContent getNewsContent(String newsId) {
+        Realm realm = Realm.getDefaultInstance();
+        return realm
+                .where(NewsContent.class)
+                .equalTo("newsId", newsId)
+                .findFirst();
     }
 
     @Override
-    public Maybe<NewsContent> insertOrUpdateNewsContent(NewsContent newsContent) {
+    public Completable insertOrUpdateNewsContent(NewsContent newsContent) {
         return null;
     }
-
-    @Override
-    public Completable clearNewsTable() {
-        return Completable.fromAction(() -> {
-            Realm realm = Realm.getDefaultInstance();
-            realm.executeTransaction(innerRealm -> {
-                realm
-                        .where(News.class)
-                        .findAll()
-                        .deleteAllFromRealm();
-            });
-
-        });
-    }
-
 
 }

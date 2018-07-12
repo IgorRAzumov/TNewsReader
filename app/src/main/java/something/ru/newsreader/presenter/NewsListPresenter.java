@@ -64,7 +64,7 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
     public void onNewsClick(int position) {
         News news = newsRealmResults.get(position);
         if (news != null) {
-            getViewState().showNewsContent(news.getNewsId());
+            getViewState().showNewsContent(news.getId());
         }
     }
 

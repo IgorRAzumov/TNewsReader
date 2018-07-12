@@ -8,5 +8,5 @@ import com.arellomobile.mvp.viewstate.strategy.StateStrategyType;
 public interface MainView extends MvpView {
     void showNewsListFragment();
 
-    void showContentFragment(String newsId);
+    void showNewsContentFragment(String newsId);
 }

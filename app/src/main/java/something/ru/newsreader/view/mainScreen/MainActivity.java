@@ -8,10 +8,12 @@ import com.arellomobile.mvp.presenter.InjectPresenter;
 
 import something.ru.newsreader.R;
 import something.ru.newsreader.presenter.MainViewPresenter;
+import something.ru.newsreader.view.fragment.newsContent.NewsContentFragment;
 import something.ru.newsreader.view.fragment.newsList.NewsListFragment;
 
 public class MainActivity extends MvpAppCompatActivity implements MainView,
-        NewsListFragment.OnFragmentInteractionListener {
+        NewsListFragment.OnFragmentInteractionListener,
+        NewsContentFragment.OnFragmentInteractionListener {
     @InjectPresenter
     MainViewPresenter mainViewPresenter;
 
@@ -36,7 +38,12 @@ public class MainActivity extends MvpAppCompatActivity implements MainView,
     }
 
     @Override
-    public void showContentFragment(String newsId) {
-
+    public void showNewsContentFragment(String newsId) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fl_activity_main_frame, NewsContentFragment
+                        .newInstance(newsId))
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .commit();
     }
 }

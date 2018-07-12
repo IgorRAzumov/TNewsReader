@@ -8,6 +8,8 @@ import something.ru.newsreader.view.mainScreen.MainView;
 @InjectViewState
 public class MainViewPresenter extends MvpPresenter<MainView> {
 
+    private String currentNewsId;
+
     @Override
     protected void onFirstViewAttach() {
         super.onFirstViewAttach();
@@ -15,6 +17,11 @@ public class MainViewPresenter extends MvpPresenter<MainView> {
     }
 
     public void onNewsClick(String newsId) {
-        getViewState().showContentFragment(newsId);
+        currentNewsId = newsId;
+        getViewState().showNewsContentFragment(currentNewsId);
+    }
+
+    public String getCurrentNewsId() {
+        return currentNewsId;
     }
 }
