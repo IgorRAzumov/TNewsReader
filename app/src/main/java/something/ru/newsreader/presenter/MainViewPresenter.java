@@ -27,7 +27,7 @@ public class MainViewPresenter extends MvpPresenter<MainView> {
 
     public void onBackPressed(boolean isNewsListViewVisible) {
         if (isNewsListViewVisible) {
-            getViewState().exitWithBackPressed();
+            getViewState().exitFromApp();
         } else {
             getViewState().closeNewsContentView();
         }

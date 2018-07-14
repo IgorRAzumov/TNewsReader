@@ -79,7 +79,7 @@ public class MainActivity extends MvpAppCompatActivity implements MainView,
     }
 
     @Override
-    public void exitWithBackPressed() {
+    public void exitFromApp() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
         startActivity(intent);

@@ -11,7 +11,7 @@ public interface MainView extends MvpView {
 
     void showNewsContentView(String newsId);
 
-    void exitWithBackPressed();
+    void exitFromApp();
 
     void closeNewsContentView();
 }

@@ -1,5 +1,6 @@
 package something.ru.newsreader.model.database.realm;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Completable;
@@ -48,7 +49,7 @@ public class RealmDatabaseService implements IDatabaseService {
     }
 
     @Override
-    public Maybe<NewsContent> getNewsContent(String newsId) {
+    public Maybe<NewsContent> getNewsContent(final String newsId) {
         return Maybe.create(emitter -> {
             try (Realm realm = Realm.getDefaultInstance()) {
                 NewsContent newsContent = realm
@@ -62,5 +63,53 @@ public class RealmDatabaseService implements IDatabaseService {
                 }
             }
         });
+    }
+
+    @Override
+    public Maybe<List<News>> getNewss() {
+        return Maybe.create(emitter -> {
+            Realm realm = Realm.getDefaultInstance();
+            List<News> newsList = realm
+                    .where(News.class)
+                    .sort("publicationDate", Sort.DESCENDING)
+                    .findAll();
+            if (newsList.isEmpty()) {
+                emitter.onComplete();
+            } else emitter.onSuccess(newsList);
+        });
+    }
+
+    @Override
+    public void insertOrUpdatgeNews(final List<News> newsList) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            realm.executeTransaction(innerRealm -> {
+                realm.insertOrUpdate(createUpdateOrInsertList(newsList, innerRealm));
+            });
+        }
+    }
+
+    private List<News> createUpdateOrInsertList(List<News> newsList, Realm innerRealm) {
+        RealmResults<News> realmNewsList = innerRealm
+                .where(News.class)
+                .findAll();
+        if (realmNewsList.isEmpty()) {
+            return newsList;
+        }
+
+        List<News> newsToInsertOrUpdate = new ArrayList<>();
+        for (News news : newsList) {
+            News realmNews = innerRealm
+                    .where(News.class)
+                    .equalTo("id", news.getId())
+                    .findFirst();
+            if (realmNews == null) {
+                newsToInsertOrUpdate.add(news);
+            } else {
+                if (!realmNews.getPublicationDate().equals(news.getPublicationDate())) {
+                    newsToInsertOrUpdate.add(news);
+                }
+            }
+        }
+        return newsToInsertOrUpdate;
     }
 }

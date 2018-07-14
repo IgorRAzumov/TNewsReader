@@ -3,6 +3,7 @@ package something.ru.newsreader.view.fragment.newsList;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -77,19 +78,20 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
     }
 
     @Override
-    public void showLoading() {
-        loadingProgress.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void hideLoading() {
-        loadingProgress.setVisibility(View.GONE);
+    public void init() {
+        initNewsRecycler();
+        initRefreshLayout();
     }
 
     @Override
     public void loadCompleted() {
-        initNewsRecycler();
-        initRefreshLayout();
+
+    }
+
+
+    @Override
+    public void exitFromApp() {
+        onFragmentInteractionListener.exitFromApp();
     }
 
     @Override
@@ -117,20 +119,90 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
         newsListAdapter.notifyItemRangeChanged(startIndex, length);
     }
 
-
     @Override
-    public void showErrorLoadMessage() {
-
+    public void showLoading() {
+        loadingProgress.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void showNoNetworkEmptyDataMessage() {
-
+    public void hideLoading() {
+        loadingProgress.setVisibility(View.GONE);
     }
 
+    @Override
+    public void showEmptyDataNoNetworkMessage() {
+        final Snackbar snackbar = Snackbar.make(swipeRefreshLayout, "Отсутствует подключение к сети. " +
+                        "Отсутствуют сохраненные данные. Проверьте подключение и повторите попытку.",
+                Snackbar.LENGTH_INDEFINITE);
+        snackbar
+                .setAction("ПОВТОРИТЬ", view -> {
+                    newsListPresenter.retryLoad();
+                    snackbar.dismiss();
+
+                })
+                .setAction("ВЫХОД", v -> {
+                    newsListPresenter.exitButtonClick();
+                    snackbar.dismiss();
+                }).show();
+    }
+
+    @Override
+    public void showNoNetworkForUpdateMessage() {
+        final Snackbar snackbar = Snackbar.make(swipeRefreshLayout, "Вы видете сохраненные результаты ." +
+                        "Отсутствует подключение к сети.",
+                Snackbar.LENGTH_INDEFINITE);
+        snackbar
+                .setAction("ПОВТОРИТЬ", view -> {
+                    newsListPresenter.retryLoad();
+                    snackbar.dismiss();
+                })
+                .setAction("ПРОДОЛЖИТЬ", view -> snackbar.dismiss())
+                .show();
+    }
+
+    @Override
+    public void showErrorUpdateNewsMessage() {
+        Snackbar snackbar = Snackbar.make(swipeRefreshLayout, "Ошибка  загрузки обновлений данных",
+                Snackbar.LENGTH_INDEFINITE);
+        snackbar
+                .setAction("ПОВТОРИТЬ", view -> {
+                    newsListPresenter.retryLoad();
+                    snackbar.dismiss();
+                })
+                .setAction("ПРОДОЛЖИТЬ", view -> snackbar.dismiss())
+                .show();
+
+    }
 
     @Override
     public void showErrorMessage() {
+        final Snackbar snackbar = Snackbar.make(swipeRefreshLayout, "Ошибка загрузки данных.",
+                Snackbar.LENGTH_INDEFINITE);
+        snackbar
+                .setAction("ПОВТОРИТЬ", view -> {
+                    newsListPresenter.retryLoad();
+                    snackbar.dismiss();
+                })
+                .setAction("ВЫХОД", v -> {
+                    newsListPresenter.exitButtonClick();
+                    snackbar.dismiss();
+                }).show();
+    }
+
+    @Override
+    public void showErrorMessageWithNoNetwork() {
+        final Snackbar snackbar = Snackbar.make(swipeRefreshLayout, "Ошибка загрузки данных. " +
+                        "Отсутствует подключение к сети.",
+                Snackbar.LENGTH_INDEFINITE);
+        snackbar
+                .setAction("ПОВТОРИТЬ", view -> {
+                    newsListPresenter.retryLoad();
+                    snackbar.dismiss();
+                })
+                .setAction("ВЫХОД", v -> {
+                    newsListPresenter.exitButtonClick();
+                    snackbar.dismiss();
+                }).show();
 
     }
 
@@ -148,7 +220,7 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
 
     private void initRefreshLayout() {
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            newsListPresenter.updateNews();
+            //    newsListPresenter.updateNews();
         });
     }
 
@@ -164,7 +236,7 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
 
     public interface OnFragmentInteractionListener {
         void onNewsClick(String newsId);
+
+        void exitFromApp();
     }
-
-
 }

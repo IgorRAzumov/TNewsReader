@@ -5,9 +5,12 @@ import android.annotation.SuppressLint;
 import com.arellomobile.mvp.InjectViewState;
 import com.arellomobile.mvp.MvpPresenter;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.inject.Inject;
 
 import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.OrderedCollectionChangeSet;
 import io.realm.OrderedRealmCollectionChangeListener;
 import io.realm.RealmResults;
@@ -25,48 +28,79 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
     private RealmResults<News> newsRealmResults;
     private final Scheduler scheduler;
     private final OrderedRealmCollectionChangeListener<RealmResults<News>> listener;
-    private boolean isDataLoading;
+    private AtomicBoolean isDataUpdating;
 
     public NewsListPresenter(Scheduler scheduler) {
         this.scheduler = scheduler;
         listener = createListener();
-        isDataLoading = false;
+        isDataUpdating = new AtomicBoolean();
+        isDataUpdating.set(false);
     }
 
 
     @Override
     protected void onFirstViewAttach() {
         super.onFirstViewAttach();
+        getViewState().init();
         getViewState().showLoading();
-        loadNews();
+        loasdNews();
     }
 
+
     @SuppressLint("CheckResult")
-    private void loadNews() {
-        isDataLoading = true;
+    private void loasdNews() {
         newsRepo
                 .getAllNews()
                 .subscribe(news -> {
                     newsRealmResults = news;
-                    if (newsRealmResults.isEmpty()) {
-                        getViewState().loadCompleted();
+                    boolean isOnline = INetworkStatus.isOnline();
 
-                        if (!INetworkStatus.isOnline()) {
-                            isDataLoading = false;
+                    if (newsRealmResults.isEmpty()) {
+                        if (!isOnline) {
                             getViewState().hideLoading();
-                            getViewState().showNoNetworkEmptyDataMessage();
+                            getViewState().showEmptyDataNoNetworkMessage();
+                        } else {
+                            updateNews();
                         }
                     } else {
-                        isDataLoading = false;
                         getViewState().hideLoading();
-                        getViewState().loadCompleted();
+                        if (!isOnline) {
+                            getViewState().showNoNetworkForUpdateMessage();
+                        } else {
+                            updateNews();
+                        }
                     }
                 }, throwable -> {
-                    isDataLoading = false;
                     getViewState().hideLoading();
-                    getViewState().showErrorMessage();
+                    if (!INetworkStatus.isOnline()) {
+                        getViewState().showErrorMessageWithNoNetwork();
+                    } else {
+                        getViewState().showErrorMessage();
+                    }
                 });
     }
+
+    /*addNewsRealResultListener();*/
+    @SuppressLint("CheckResult")
+    private void updateNews() {
+        newsRealmResults.removeAllChangeListeners();
+        addNewsRealResultListener();
+        isDataUpdating.set(true);
+
+        newsRepo
+                .updateNNNews()
+                .subscribeOn(Schedulers.io())
+                .observeOn(scheduler)
+                .subscribe(() -> {
+                    isDataUpdating.set(false);
+                    getViewState().hideLoading();
+                }, throwable -> {
+                    isDataUpdating.set(false);
+                    getViewState().hideLoading();
+                    getViewState().showErrorUpdateNewsMessage();
+                });
+    }
+
 
     @Override
     public void bindNewsListRow(int position, INewsRowView rowView) {
@@ -87,7 +121,9 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
 
     @Override
     public void onViewAttach() {
-        addNewsRealResultListener();
+        if (newsRealmResults != null) {
+            addNewsRealResultListener();
+        }
     }
 
     @Override
@@ -103,48 +139,48 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
     }
 
 
-    public void updateNews() {
-        newsRepo.updateNews();
-    }
-
-
     private OrderedRealmCollectionChangeListener<RealmResults<News>> createListener() {
         return (news, changeSet) -> {
             if (changeSet == null) {
                 getViewState().notifyNewDataChanged();
                 return;
             }
-            if (!news.isEmpty()) {
-                getViewState().hideLoading();
-            }
 
             OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
             for (int i = deletions.length - 1; i >= 0; i--) {
                 OrderedCollectionChangeSet.Range range = deletions[i];
-                NewsListPresenter.this.getViewState().notifyNewsRemoved(range.startIndex, range.length);
+               getViewState().notifyNewsRemoved(range.startIndex, range.length);
             }
 
             OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
             for (OrderedCollectionChangeSet.Range range : insertions) {
-                NewsListPresenter.this.getViewState().notifyItemRangeInserted(range.startIndex, range.length);
+               getViewState().notifyItemRangeInserted(range.startIndex, range.length);
             }
 
             OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
             for (OrderedCollectionChangeSet.Range range : modifications) {
-                NewsListPresenter.this.getViewState().notifyNewsChanged(range.startIndex, range.length);
+                getViewState().notifyNewsChanged(range.startIndex, range.length);
             }
         };
     }
 
     private void addNewsRealResultListener() {
         newsRealmResults.addChangeListener(listener);
-
     }
 
     private void removeNewsRealResultListener() {
-        newsRealmResults.removeChangeListener(listener);
+        if (newsRealmResults != null) {
+            newsRealmResults.removeChangeListener(listener);
+        }
     }
 
 
-}
+    public void retryLoad() {
+        if (!isDataUpdating.get()) {
+        }
+    }
 
+    public void exitButtonClick() {
+        getViewState().exitFromApp();
+    }
+}

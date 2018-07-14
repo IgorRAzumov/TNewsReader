@@ -20,4 +20,8 @@ public interface IDatabaseService {
     Completable insertOrUpdateNewsContent(NewsContent newsContent);
 
     Maybe<NewsContent> getNewsContent(String newsId);
+
+    Maybe<List<News>> getNewss();
+
+    void insertOrUpdatgeNews(List<News> payload);
 }

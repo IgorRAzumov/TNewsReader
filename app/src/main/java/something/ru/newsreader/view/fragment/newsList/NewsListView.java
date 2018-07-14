@@ -31,10 +31,22 @@ public interface NewsListView extends MvpView{
     void notifyNewsChanged(int startIndex, int length);
 
     @StateStrategyType(SkipStrategy.class)
-    void showErrorLoadMessage();
+    void showEmptyDataNoNetworkMessage();
 
     @StateStrategyType(SkipStrategy.class)
-    void showNoNetworkEmptyDataMessage();
+    void showErrorUpdateNewsMessage();
 
+    @StateStrategyType(SkipStrategy.class)
     void showErrorMessage();
+
+    @StateStrategyType(SkipStrategy.class)
+    void showNoNetworkForUpdateMessage();
+
+    @StateStrategyType(SkipStrategy.class)
+    void exitFromApp();
+
+    @StateStrategyType(SkipStrategy.class)
+    void showErrorMessageWithNoNetwork();
+
+    void init();
 }
