@@ -11,7 +11,8 @@ import java.lang.reflect.Type;
 import something.ru.newsreader.model.entity.NewsContent;
 
 public class NewsContentDeserializer implements JsonDeserializer<NewsContent> {
-    private static final String ERROR_JSON_CONTAINS_MEMBER = "News json don`t contains needed fields";
+    private static final String ERROR_JSON_CONTAINS_MEMBER = "NewsContent json " +
+            "don`t contains needed fields";
 
     @Override
     public NewsContent deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
@@ -19,10 +20,10 @@ public class NewsContentDeserializer implements JsonDeserializer<NewsContent> {
         NewsContent newsContent = new NewsContent();
         JsonObject jsonObject = json.getAsJsonObject();
 
-        if (jsonObject.has("news")) {
-            JsonObject news = jsonObject.getAsJsonObject("news");
-            if (news.has("id")) {
-                newsContent.setId(jsonObject.get("id").getAsString());
+        if (jsonObject.has("title")) {
+            JsonObject titleObject = jsonObject.getAsJsonObject("title");
+            if (titleObject.has("id")) {
+                newsContent.setId(titleObject.get("id").getAsString());
             } else {
                 throw new JsonParseException(ERROR_JSON_CONTAINS_MEMBER);
             }

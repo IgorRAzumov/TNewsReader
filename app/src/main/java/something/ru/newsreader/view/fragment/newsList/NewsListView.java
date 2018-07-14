@@ -16,12 +16,6 @@ public interface NewsListView extends MvpView{
     void loadCompleted();
 
     @StateStrategyType(SkipStrategy.class)
-    void showErrorResponseMessage();
-
-    @StateStrategyType(SkipStrategy.class)
-    void showErrorLoadMessage();
-
-    @StateStrategyType(SkipStrategy.class)
     void showNewsContent(String newsId);
 
     @StateStrategyType(SkipStrategy.class)
@@ -37,8 +31,10 @@ public interface NewsListView extends MvpView{
     void notifyNewsChanged(int startIndex, int length);
 
     @StateStrategyType(SkipStrategy.class)
-    void showNoNetworkEmptyDataMessage();
+    void showErrorLoadMessage();
 
     @StateStrategyType(SkipStrategy.class)
-    void showNoNetworkMessage();
+    void showNoNetworkEmptyDataMessage();
+
+    void showErrorMessage();
 }

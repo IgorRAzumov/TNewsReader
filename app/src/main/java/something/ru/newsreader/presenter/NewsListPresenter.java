@@ -25,10 +25,12 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
     private RealmResults<News> newsRealmResults;
     private final Scheduler scheduler;
     private final OrderedRealmCollectionChangeListener<RealmResults<News>> listener;
+    private boolean isDataLoading;
 
     public NewsListPresenter(Scheduler scheduler) {
         this.scheduler = scheduler;
         listener = createListener();
+        isDataLoading = false;
     }
 
 
@@ -41,14 +43,29 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
 
     @SuppressLint("CheckResult")
     private void loadNews() {
-        newsRealmResults = newsRepo.getAllNews();
-        boolean isOnline = INetworkStatus.isOnline();
+        isDataLoading = true;
+        newsRepo
+                .getAllNews()
+                .subscribe(news -> {
+                    newsRealmResults = news;
+                    if (newsRealmResults.isEmpty()) {
+                        getViewState().loadCompleted();
 
-        if (!newsRealmResults.isEmpty()) {
-            emptyResultLoad(isOnline);
-        } else {
-            loadCompleted(isOnline);
-        }
+                        if (!INetworkStatus.isOnline()) {
+                            isDataLoading = false;
+                            getViewState().hideLoading();
+                            getViewState().showNoNetworkEmptyDataMessage();
+                        }
+                    } else {
+                        isDataLoading = false;
+                        getViewState().hideLoading();
+                        getViewState().loadCompleted();
+                    }
+                }, throwable -> {
+                    isDataLoading = false;
+                    getViewState().hideLoading();
+                    getViewState().showErrorMessage();
+                });
     }
 
     @Override
@@ -94,7 +111,7 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
     private OrderedRealmCollectionChangeListener<RealmResults<News>> createListener() {
         return (news, changeSet) -> {
             if (changeSet == null) {
-                NewsListPresenter.this.getViewState().notifyNewDataChanged();
+                getViewState().notifyNewDataChanged();
                 return;
             }
             if (!news.isEmpty()) {
@@ -129,21 +146,5 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
     }
 
 
-    private void loadCompleted(boolean isOnline) {
-        if (isOnline) {
-            getViewState().loadCompleted();
-        } else {
-            getViewState().showNoNetworkEmptyDataMessage();
-        }
-    }
-
-    private void emptyResultLoad(boolean isOnline) {
-        getViewState().hideLoading();
-        getViewState().loadCompleted();
-
-        if (!isOnline) {
-            getViewState().showNoNetworkMessage();
-        }
-    }
 }
 

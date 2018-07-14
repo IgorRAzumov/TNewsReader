@@ -13,15 +13,23 @@ public class MainViewPresenter extends MvpPresenter<MainView> {
     @Override
     protected void onFirstViewAttach() {
         super.onFirstViewAttach();
-        getViewState().showNewsListFragment();
+        getViewState().showNewsListView();
     }
 
     public void onNewsClick(String newsId) {
         currentNewsId = newsId;
-        getViewState().showNewsContentFragment(currentNewsId);
+        getViewState().showNewsContentView(currentNewsId);
     }
 
     public String getCurrentNewsId() {
         return currentNewsId;
+    }
+
+    public void onBackPressed(boolean isNewsListViewVisible) {
+        if (isNewsListViewVisible) {
+            getViewState().exitWithBackPressed();
+        } else {
+            getViewState().closeNewsContentView();
+        }
     }
 }

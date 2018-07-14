@@ -27,6 +27,11 @@ public class NewsContent extends RealmObject {
     @Expose
     private String typeId;
 
+    public boolean isEmpty() {
+        return newsId == null || newsId.isEmpty();
+    }
+
+
     public String getId() {
         return newsId;
     }

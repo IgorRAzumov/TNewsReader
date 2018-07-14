@@ -3,6 +3,7 @@ package something.ru.newsreader.model.database.realm;
 import java.util.List;
 
 import io.reactivex.Completable;
+import io.reactivex.Maybe;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -18,32 +19,48 @@ public class RealmDatabaseService implements IDatabaseService {
         return realm
                 .where(News.class)
                 .sort("publicationDate", Sort.DESCENDING)
-                .findAll();
+                .findAllAsync();
     }
 
     @Override
     public Completable insertOrUpdateNews(List<News> newsList) {
-        return Completable.create((completableEmitter) -> {
-            Realm realm = Realm.getDefaultInstance();
-            realm.executeTransaction(innerRealm -> {
-                realm.insertOrUpdate(newsList);
-            });
-            completableEmitter.onComplete();
+        return Completable.fromAction(() -> {
+            try (Realm realm = Realm.getDefaultInstance()) {
+                realm.executeTransaction(innerRealm -> {
+                    realm.insertOrUpdate(newsList);
+                });
+            }
         });
     }
 
-    @Override
-    public NewsContent getNewsContent(String newsId) {
-        Realm realm = Realm.getDefaultInstance();
-        return realm
-                .where(NewsContent.class)
-                .equalTo("newsId", newsId)
-                .findFirst();
-    }
 
     @Override
     public Completable insertOrUpdateNewsContent(NewsContent newsContent) {
-        return null;
+        return Completable
+                .create(completableEmitter -> {
+                    try (Realm realm = Realm.getDefaultInstance()) {
+                        realm.executeTransaction(innerRealm -> {
+                            innerRealm.insertOrUpdate(newsContent);
+                        });
+                        completableEmitter.onComplete();
+                    }
+                });
     }
 
+    @Override
+    public Maybe<NewsContent> getNewsContent(String newsId) {
+        return Maybe.create(emitter -> {
+            try (Realm realm = Realm.getDefaultInstance()) {
+                NewsContent newsContent = realm
+                        .where(NewsContent.class)
+                        .equalTo("newsId", newsId)
+                        .findFirst();
+                if (newsContent == null) {
+                    emitter.onComplete();
+                } else {
+                    emitter.onSuccess(realm.copyFromRealm(newsContent));
+                }
+            }
+        });
+    }
 }

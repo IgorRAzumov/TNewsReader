@@ -27,6 +27,7 @@ import something.ru.newsreader.view.adapters.NewsListAdapter;
 
 
 public class NewsListFragment extends MvpAppCompatFragment implements NewsListView {
+    public static final String TAG = NewsListFragment.class.getSimpleName();
     @BindView(R.id.srl_fragment_news_list_news)
     SwipeRefreshLayout swipeRefreshLayout;
     @BindView(R.id.rv_fragment_news_list_news)
@@ -37,15 +38,15 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
     @InjectPresenter
     NewsListPresenter newsListPresenter;
 
-    NewsListAdapter newsListAdapter;
+    private NewsListAdapter newsListAdapter;
     private OnFragmentInteractionListener onFragmentInteractionListener;
     private Unbinder unbinder;
 
     @ProvidePresenter
     public NewsListPresenter provideMainPresenter() {
-        NewsListPresenter newsListPresenter = new NewsListPresenter(AndroidSchedulers.mainThread());
-        App.getInstance().getAppComponent().inject(newsListPresenter);
-        return newsListPresenter;
+        NewsListPresenter presenter = new NewsListPresenter(AndroidSchedulers.mainThread());
+        App.getInstance().getAppComponent().inject(presenter);
+        return presenter;
     }
 
     public NewsListFragment() {
@@ -87,8 +88,8 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
 
     @Override
     public void loadCompleted() {
-        initRefreshLayout();
         initNewsRecycler();
+        initRefreshLayout();
     }
 
     @Override
@@ -116,21 +117,20 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
         newsListAdapter.notifyItemRangeChanged(startIndex, length);
     }
 
-    @Override
-    public void showErrorResponseMessage() {
-
-    }
 
     @Override
     public void showErrorLoadMessage() {
 
     }
+
     @Override
     public void showNoNetworkEmptyDataMessage() {
 
     }
+
+
     @Override
-    public void showNoNetworkMessage() {
+    public void showErrorMessage() {
 
     }
 
@@ -154,9 +154,10 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
 
     private void initNewsRecycler() {
         Context context = getContext();
-        newsRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
-        newsRecycler.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
+        assert context != null;
 
+        newsRecycler.setLayoutManager(new LinearLayoutManager(context));
+        newsRecycler.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
         newsListAdapter = new NewsListAdapter(newsListPresenter);
         newsRecycler.setAdapter(newsListAdapter);
     }
@@ -164,4 +165,6 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
     public interface OnFragmentInteractionListener {
         void onNewsClick(String newsId);
     }
+
+
 }

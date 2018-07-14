@@ -2,12 +2,12 @@ package something.ru.newsreader.model.repo;
 
 import android.annotation.SuppressLint;
 
+import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.RealmResults;
 import something.ru.newsreader.model.api.IApiService;
 import something.ru.newsreader.model.database.IDatabaseService;
 import something.ru.newsreader.model.entity.News;
-import something.ru.newsreader.model.entity.NewsContent;
 import something.ru.newsreader.model.networkStatus.INetworkStatus;
 
 public class NewsRepo {
@@ -20,54 +20,34 @@ public class NewsRepo {
     }
 
     @SuppressLint("CheckResult")
-    public RealmResults<News> getAllNews() {
+    public Single<RealmResults<News>> getAllNews() {
         if (INetworkStatus.isOnline()) {
             updateNews();
         }
-        return databaseService.getNews();
+        return Single
+                .just(databaseService.getNews())
+                .doOnError(throwable -> {
+                    //databaseError
+                });
     }
 
     @SuppressLint("CheckResult")
     public void updateNews() {
         apiService
                 .getAllNews()
+                .filter(apiResponse -> apiResponse.getResultCode().equals("OK"))
+                .subscribeOn(Schedulers.io())
                 .subscribe(apiResponse -> {
-                            if (apiResponse.getResultCode().equals("OK")) {
-                                databaseService
-                                        .insertOrUpdateNews(apiResponse.getPayload())
-                                        .subscribeOn(Schedulers.io())
-                                        .subscribe();
-                            }
+                            databaseService
+                                    .insertOrUpdateNews(apiResponse.getPayload())
+                                    .subscribe();
+
                         }
                         , throwable -> {
+                            System.out.println();
+                        }, () -> {
 
                         });
     }
-
-
-    @SuppressLint("CheckResult")
-    public NewsContent getNewsContent(String newsId) {
-        if (INetworkStatus.isOnline()) {
-            updateNewsContent(newsId);
-        }
-        return databaseService.getNewsContent(newsId);
-    }
-
-    @SuppressLint("CheckResult")
-    private void updateNewsContent(String newsId) {
-        apiService
-                .getNewsContent(newsId)
-                .subscribe(apiResponse -> {
-                    if (apiResponse.getResultCode().equals("OK")) {
-                        databaseService
-                                .insertOrUpdateNewsContent(apiResponse.getPayload())
-                                .subscribeOn(Schedulers.io())
-                                .subscribe();
-                    }
-                }, throwable -> {
-
-                });
-    }
-
 
 }

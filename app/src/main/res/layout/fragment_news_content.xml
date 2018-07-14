@@ -3,6 +3,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="@dimen/material_horizontal_padding"
     tools:context=".view.fragment.newsContent.NewsContentFragment">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingEnd="@dimen/material_vertical_padding"
+        android:paddingStart="@dimen/material_vertical_padding">
+
+        <TextView
+            android:id="@+id/tv_fr_news_cont_news_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="32dp"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Body2" />
+    </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/pb_fr_news_cont_news_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
 </FrameLayout>
+
+

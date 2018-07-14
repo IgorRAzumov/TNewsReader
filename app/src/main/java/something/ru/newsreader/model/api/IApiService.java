@@ -2,6 +2,7 @@ package something.ru.newsreader.model.api;
 
 import java.util.List;
 
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
@@ -14,5 +15,5 @@ public interface IApiService {
     Single<ApiResponse<List<News>>> getAllNews();
 
     @GET("news_content")
-    Single<ApiResponse<NewsContent>> getNewsContent(@Query("id") String id);
+    Maybe<ApiResponse<NewsContent>> getNewsContent(@Query("id") String id);
 }

@@ -12,4 +12,14 @@ public interface NewsContentView extends MvpView  {
     void init();
 
     void showLoading();
+
+    void hideLoading();
+
+    void showNetworkSearchError();
+
+    void showEmptyDataNoNetworkMessage();
+
+    void showNewsContent(String content, Long creationDate, Long lastModificationDate);
+
+    void showErrorMessage();
 }
