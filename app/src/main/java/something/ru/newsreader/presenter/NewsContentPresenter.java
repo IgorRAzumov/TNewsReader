@@ -73,4 +73,8 @@ public class NewsContentPresenter extends MvpPresenter<NewsContentView> {
             getViewState().showEmptyDataNoNetworkMessage();
         }
     }
+
+    public void viewOnPause() {
+        getViewState().clearMessages();
+    }
 }

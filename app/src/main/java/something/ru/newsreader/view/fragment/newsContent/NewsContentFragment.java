@@ -76,7 +76,14 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        newsContentPresenter.viewOnPause();
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_news_content, container, false);
         unbinder = ButterKnife.bind(this, view);
