@@ -1,6 +1,7 @@
 package something.ru.newsreader.view.fragment.newsList;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -38,6 +39,7 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
     @InjectPresenter
     NewsListPresenter newsListPresenter;
 
+    private Snackbar snackbar;
     private NewsListAdapter newsListAdapter;
     private OnFragmentInteractionListener onFragmentInteractionListener;
     private Unbinder unbinder;
@@ -84,7 +86,7 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
         RecyclerView.LayoutManager layoutManager = newsRecycler.getLayoutManager();
         if (layoutManager != null) {
             int position = ((LinearLayoutManager) layoutManager).findFirstVisibleItemPosition();
-            newsListPresenter.saveNewsPosition(position);
+            newsListPresenter.viewOnPause(position);
         }
     }
 
@@ -177,11 +179,11 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
     }
 
     private void initRefreshLayout() {
+        Resources resources = getResources();
+        Resources.Theme theme = getActivity().getTheme();
         swipeRefreshLayout.setOnRefreshListener(() -> newsListPresenter.updateNews());
-        swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
+        swipeRefreshLayout.setColorSchemeResources(R.color.blue_600, R.color.red_600,
+                R.color.green_600, R.color.orange_600);
     }
 
     private void initNewsRecycler() {
@@ -194,8 +196,16 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
         newsRecycler.setAdapter(newsListAdapter);
     }
 
+    @Override
+    public void clearMessages() {
+        if (snackbar != null && snackbar.isShownOrQueued()) {
+            snackbar.dismiss();
+        }
+    }
+
     private void showMessageWithRetryLoad(String message, int duration) {
-        final Snackbar snackbar = Snackbar.make(swipeRefreshLayout, message, duration);
+        clearMessages();
+        snackbar = Snackbar.make(swipeRefreshLayout, message, duration);
         snackbar
                 .setAction(R.string.news_list_fr_snackbar_action_text_retry, view -> {
                     newsListPresenter.retryLoad();

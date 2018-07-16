@@ -72,6 +72,9 @@ public class NewsContentPresenter extends MvpPresenter<NewsContentView> {
                 });
     }
 
+    public void viewOnPause() {
+        getViewState().clearMessages();
+    }
 
     private void noDataLoaded() {
         getViewState().hideLoading();

@@ -114,8 +114,9 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
                         });
     }
 
-    public void saveNewsPosition(int position) {
+    public void viewOnPause(int position) {
         savedNewsPosition = position;
+        getViewState().clearMessages();
     }
 
     public void viewOnResume() {

@@ -22,4 +22,7 @@ public interface NewsContentView extends MvpView  {
 
     @StateStrategyType(OneExecutionStateStrategy.class)
     void showErrorDataLoadMessage();
+
+    @StateStrategyType(OneExecutionStateStrategy.class)
+    void clearMessages();
 }

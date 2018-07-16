@@ -53,8 +53,18 @@ public class RealmDatabaseService implements IDatabaseService {
         return Completable
                 .create(completableEmitter -> {
                     try (Realm realm = Realm.getDefaultInstance()) {
-                        realm.executeTransaction(innerRealm -> innerRealm.insertOrUpdate(newsContent));
-                        completableEmitter.onComplete();
+                        realm.executeTransaction(innerRealm -> {
+                            NewsContent savedNewsContent = innerRealm
+                                    .where(NewsContent.class)
+                                    .equalTo("newsId", newsContent.getId())
+                                    .findFirst();
+                            if (savedNewsContent == null ||
+                                    savedNewsContent.getLastModificationDate()
+                                            .before(newsContent.getLastModificationDate())) {
+                                realm.insertOrUpdate(newsContent);
+                            }
+                            completableEmitter.onComplete();
+                        });
                     }
                 });
     }

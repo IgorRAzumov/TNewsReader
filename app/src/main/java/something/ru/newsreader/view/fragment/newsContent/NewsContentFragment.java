@@ -32,7 +32,7 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
     public static final String TAG = NewsContentFragment.class.getSimpleName();
     private static final String NEWS_ID_BUNDLE_KEY = "news-id-bundle-key";
     @BindView(R.id.srf_fr_news_content_root_view)
-    SwipeRefreshLayout rootView;
+    SwipeRefreshLayout swipeRefreshLayout;
     @BindView(R.id.sv_fr_news_content_news_scroll)
     ScrollView newsContentScrollView;
     @BindView(R.id.tv_fr_news_content_news_text)
@@ -43,6 +43,7 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
     @InjectPresenter
     NewsContentPresenter newsContentPresenter;
 
+    private Snackbar snackbar;
     private Unbinder unbinder;
 
     @ProvidePresenter
@@ -82,8 +83,16 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        newsContentPresenter.viewOnPause();
+    }
+
+    @Override
     public void init() {
-        rootView.setEnabled(false);
+        swipeRefreshLayout.setColorSchemeResources(R.color.blue_600, R.color.red_600,
+                R.color.green_600, R.color.orange_600);
+        swipeRefreshLayout.setEnabled(false);
     }
 
     @Override
@@ -95,17 +104,24 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
 
     @Override
     public void showLoading() {
-        rootView.setRefreshing(true);
+        swipeRefreshLayout.setRefreshing(true);
     }
 
     @Override
     public void hideLoading() {
-        rootView.setRefreshing(false);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
     public void showErrorDataLoadMessage() {
         showMessageWithRetryLoad(getString(R.string.error_data_load_message));
+    }
+
+    @Override
+    public void clearMessages() {
+        if (snackbar != null && snackbar.isShownOrQueued()) {
+            snackbar.dismiss();
+        }
     }
 
 
@@ -121,7 +137,8 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
     }
 
     private void showMessageWithRetryLoad(String message) {
-        final Snackbar snackbar = Snackbar.make(rootView, message, Snackbar.LENGTH_INDEFINITE);
+        clearMessages();
+        snackbar = Snackbar.make(swipeRefreshLayout, message, Snackbar.LENGTH_INDEFINITE);
         snackbar
                 .setAction(R.string.news_list_fr_snackbar_action_text_retry, view -> {
                     newsContentPresenter.loadNewsContent();
@@ -129,7 +146,7 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
                 });
         View snackbarView = snackbar.getView();
         TextView textView = snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-        textView.setMaxLines(5);
+        textView.setMaxLines(getResources().getInteger(R.integer.snackbar_max_lines));
         snackbar.show();
     }
 }

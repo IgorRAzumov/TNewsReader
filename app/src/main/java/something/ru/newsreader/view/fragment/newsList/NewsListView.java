@@ -44,4 +44,7 @@ public interface NewsListView extends MvpView{
 
     @StateStrategyType(SkipStrategy.class)
     void restoreViewState(int savedNewsPosition);
+
+    @StateStrategyType(OneExecutionStateStrategy.class)
+    void clearMessages();
 }
