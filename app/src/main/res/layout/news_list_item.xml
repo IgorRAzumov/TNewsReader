@@ -11,13 +11,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="end"
-        android:paddingTop="8dp"
+        android:paddingTop="@dimen/tv_news_list_item_date_pad_top"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textStyle="italic"
         tools:text="TextView" />
     <TextView
         android:id="@+id/tv_news_list_item_news"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle"
+        android:paddingBottom="@dimen/tv_news_list_item_news_pad_bottom"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         tools:text="TextView" />
 </LinearLayout>

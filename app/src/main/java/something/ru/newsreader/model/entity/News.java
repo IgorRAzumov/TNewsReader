@@ -3,6 +3,8 @@ package something.ru.newsreader.model.entity;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -19,7 +21,7 @@ public class News extends RealmObject {
     private String text;
     @SerializedName("publicationDate")
     @Expose
-    private Long publicationDate;
+    private Date publicationDate;
     @SerializedName("bankInfoTypeId")
     @Expose
     private Integer bankInfoTypeId;
@@ -36,7 +38,7 @@ public class News extends RealmObject {
         return text;
     }
 
-    public Long getPublicationDate() {
+    public Date getPublicationDate() {
         return publicationDate;
     }
 
@@ -56,7 +58,7 @@ public class News extends RealmObject {
         this.text = text;
     }
 
-    public void setPublicationDate(Long publicationDate) {
+    public void setPublicationDate(Date publicationDate) {
         this.publicationDate = publicationDate;
     }
 

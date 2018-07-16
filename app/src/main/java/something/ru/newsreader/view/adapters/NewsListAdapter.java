@@ -2,6 +2,7 @@ package something.ru.newsreader.view.adapters;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,18 +49,14 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsLi
         presenter.onViewAttach();
     }
 
-
     @Override
     public void onDetachedFromRecyclerView(@NonNull final RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
         presenter.onViewDetached();
-
     }
 
     private View.OnClickListener createNewsClickListener() {
-        return view -> {
-            presenter.onNewsClick((int) view.getTag());
-        };
+        return view -> presenter.onNewsClick((int) view.getTag());
     }
 
     public class NewsListViewHolder extends RecyclerView.ViewHolder implements INewsRowView {
@@ -75,13 +72,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsLi
 
         @Override
         public void setNewsText(String news) {
-            newsText.setText(news);
+            newsText.setText(Html.fromHtml(news));
         }
 
         @Override
         public void setPublishDate(String pubDate) {
             nesDateText.setText(pubDate);
         }
-
     }
 }

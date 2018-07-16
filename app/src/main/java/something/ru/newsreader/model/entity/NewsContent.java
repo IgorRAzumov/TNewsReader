@@ -3,20 +3,20 @@ package something.ru.newsreader.model.entity;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
 public class NewsContent extends RealmObject {
     @PrimaryKey
-    @SerializedName("news")
-    @Expose
     private String newsId;
     @SerializedName("creationDate")
     @Expose
-    private Long creationDate;
+    private Date creationDate;
     @SerializedName("lastModificationDate")
     @Expose
-    private Long lastModificationDate;
+    private Date lastModificationDate;
     @SerializedName("content")
     @Expose
     private String content;
@@ -27,11 +27,6 @@ public class NewsContent extends RealmObject {
     @Expose
     private String typeId;
 
-    public boolean isEmpty() {
-        return newsId == null || newsId.isEmpty();
-    }
-
-
     public String getId() {
         return newsId;
     }
@@ -40,11 +35,11 @@ public class NewsContent extends RealmObject {
         return newsId;
     }
 
-    public Long getCreationDate() {
+    public Date getCreationDate() {
         return creationDate;
     }
 
-    public Long getLastModificationDate() {
+    public Date getLastModificationDate() {
         return lastModificationDate;
     }
 
@@ -76,11 +71,11 @@ public class NewsContent extends RealmObject {
         this.typeId = typeId;
     }
 
-    public void setLastModificationDate(Long lastModificationDate) {
+    public void setLastModificationDate(Date lastModificationDate) {
         this.lastModificationDate = lastModificationDate;
     }
 
-    public void setCreationDate(Long creationDate) {
+    public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
 }

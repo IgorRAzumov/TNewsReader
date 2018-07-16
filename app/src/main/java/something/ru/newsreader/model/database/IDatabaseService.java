@@ -12,16 +12,16 @@ public interface IDatabaseService {
 
     RealmResults<News> getNews();
 
-    Completable insertOrUpdateNews(List<News> newsList);
-
-
+//       Completable insertOrUpdateNews(List<News> newsList);
 
 
     Completable insertOrUpdateNewsContent(NewsContent newsContent);
 
     Maybe<NewsContent> getNewsContent(String newsId);
 
-    Maybe<List<News>> getNewss();
+    // Maybe<List<News>> getNewss();
 
-    void insertOrUpdatgeNews(List<News> payload);
+    void insertOrUpdateNews(List<News> payload);
+
+
 }

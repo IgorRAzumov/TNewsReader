@@ -2,20 +2,20 @@ package something.ru.newsreader.view.fragment.newsList;
 
 import com.arellomobile.mvp.MvpView;
 import com.arellomobile.mvp.viewstate.strategy.AddToEndSingleStrategy;
+import com.arellomobile.mvp.viewstate.strategy.OneExecutionStateStrategy;
 import com.arellomobile.mvp.viewstate.strategy.SkipStrategy;
 import com.arellomobile.mvp.viewstate.strategy.StateStrategyType;
 
 
 @StateStrategyType(AddToEndSingleStrategy.class)
 public interface NewsListView extends MvpView{
+    void init();
 
     void showLoading();
 
     void hideLoading();
 
-    void loadCompleted();
-
-    @StateStrategyType(SkipStrategy.class)
+    @StateStrategyType(OneExecutionStateStrategy.class)
     void showNewsContent(String newsId);
 
     @StateStrategyType(SkipStrategy.class)
@@ -30,23 +30,18 @@ public interface NewsListView extends MvpView{
     @StateStrategyType(SkipStrategy.class)
     void notifyNewsChanged(int startIndex, int length);
 
-    @StateStrategyType(SkipStrategy.class)
+    @StateStrategyType(OneExecutionStateStrategy.class)
     void showEmptyDataNoNetworkMessage();
 
-    @StateStrategyType(SkipStrategy.class)
-    void showErrorUpdateNewsMessage();
+    @StateStrategyType(OneExecutionStateStrategy.class)
+    void showErrorDataLoadMessage();
+
+    @StateStrategyType(OneExecutionStateStrategy.class)
+    void showSavedDataNoNetworkMessage();
+
+    @StateStrategyType(OneExecutionStateStrategy.class)
+    void showErrorDataLoadNoNetworkMessage();
 
     @StateStrategyType(SkipStrategy.class)
-    void showErrorMessage();
-
-    @StateStrategyType(SkipStrategy.class)
-    void showNoNetworkForUpdateMessage();
-
-    @StateStrategyType(SkipStrategy.class)
-    void exitFromApp();
-
-    @StateStrategyType(SkipStrategy.class)
-    void showErrorMessageWithNoNetwork();
-
-    void init();
+    void restoreViewState(int savedNewsPosition);
 }

@@ -5,25 +5,38 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.Toolbar;
 
 import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import something.ru.newsreader.R;
 import something.ru.newsreader.presenter.MainViewPresenter;
 import something.ru.newsreader.view.fragment.newsContent.NewsContentFragment;
 import something.ru.newsreader.view.fragment.newsList.NewsListFragment;
 
+
 public class MainActivity extends MvpAppCompatActivity implements MainView,
         NewsListFragment.OnFragmentInteractionListener {
+    @BindView(R.id.tb_activity_main_toolbar)
+    Toolbar toolbar;
+
     @InjectPresenter
     MainViewPresenter mainViewPresenter;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+    }
+
+    @Override
+    public void init() {
+        toolbar.setTitle(getString(R.string.main_activity_toolbar_title));
+        setSupportActionBar(toolbar);
     }
 
     @Override
@@ -51,7 +64,7 @@ public class MainActivity extends MvpAppCompatActivity implements MainView,
         Fragment newsListFragment = fragmentManager
                 .findFragmentByTag(NewsListFragment.TAG);
 
-        getSupportFragmentManager()
+        fragmentManager
                 .beginTransaction()
                 .detach(newsListFragment)
                 .add(R.id.fl_activity_main_frame, NewsContentFragment.newInstance(newsId),

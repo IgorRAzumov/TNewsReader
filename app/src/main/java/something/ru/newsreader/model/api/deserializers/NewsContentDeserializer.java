@@ -32,18 +32,20 @@ public class NewsContentDeserializer implements JsonDeserializer<NewsContent> {
         }
 
         if (jsonObject.has("creationDate")) {
-            JsonObject pubDateObject = jsonObject.getAsJsonObject("creationDate");
-            if (pubDateObject.has("milliseconds")) {
-                newsContent.setCreationDate(pubDateObject.get("milliseconds").getAsLong());
+            JsonObject creationDate = jsonObject.getAsJsonObject("creationDate");
+            if (creationDate.has("milliseconds")) {
+                newsContent.setCreationDate(DeserializerUtils.createDateFromLong(
+                        creationDate.get("milliseconds").getAsLong()));
             } else {
                 throw new JsonParseException(ERROR_JSON_CONTAINS_MEMBER);
             }
         }
 
         if (jsonObject.has("lastModificationDate")) {
-            JsonObject pubDateObject = jsonObject.getAsJsonObject("lastModificationDate");
-            if (pubDateObject.has("milliseconds")) {
-                newsContent.setLastModificationDate(pubDateObject.get("milliseconds").getAsLong());
+            JsonObject lastModifyDateObject = jsonObject.getAsJsonObject("lastModificationDate");
+            if (lastModifyDateObject.has("milliseconds")) {
+                newsContent.setLastModificationDate(DeserializerUtils.createDateFromLong(
+                        lastModifyDateObject.get("milliseconds").getAsLong()));
             } else {
                 throw new JsonParseException(ERROR_JSON_CONTAINS_MEMBER);
             }

@@ -1,11 +1,14 @@
 package something.ru.newsreader.view.fragment.newsContent;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.arellomobile.mvp.MvpAppCompatFragment;
@@ -22,22 +25,24 @@ import something.ru.newsreader.App;
 import something.ru.newsreader.R;
 import something.ru.newsreader.presenter.NewsContentPresenter;
 
+
 @StateStrategyType(AddToEndSingleStrategy.class)
 public class NewsContentFragment extends MvpAppCompatFragment implements NewsContentView {
     public static final String TAG = NewsContentFragment.class.getSimpleName();
     private static final String NEWS_ID_BUNDLE_KEY = "news-id-bundle-key";
-
-    @BindView(R.id.tv_fr_news_cont_news_text)
+    @BindView(R.id.srf_fr_news_content_root_view)
+    SwipeRefreshLayout rootView;
+    @BindView(R.id.sv_fr_news_content_news_scroll)
+    ScrollView newsContentScrollView;
+    @BindView(R.id.tv_fr_news_content_news_text)
     TextView newsText;
-    @BindView(R.id.pb_fr_news_cont_news_loading)
-    ProgressBar loadingProgress;
-
+    @BindView(R.id.tv_fr_news_content_modify_text)
+    TextView newDateText;
 
     @InjectPresenter
     NewsContentPresenter newsContentPresenter;
 
     private Unbinder unbinder;
-
 
     @ProvidePresenter
     public NewsContentPresenter provideNewsContentPresenter() {
@@ -59,7 +64,7 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_news_content, container, false);
         unbinder = ButterKnife.bind(this, view);
@@ -68,6 +73,8 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
 
     @Override
     public void init() {
+        rootView.setEnabled(false);
+
         Bundle args = getArguments();
         if (args != null) {
             newsContentPresenter.getNewsContent(args.getString(NEWS_ID_BUNDLE_KEY));
@@ -77,38 +84,50 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
     }
 
     @Override
-    public void showNewsContent(String content, Long creationDate, Long lastModificationDate) {
+    public void showNewsContent(String content, String lastModificationDate) {
         newsText.setText(Html.fromHtml(content));
+        newDateText.setVisibility(View.VISIBLE);
+        newDateText.setText(lastModificationDate);
     }
 
     @Override
     public void showLoading() {
-        loadingProgress.setVisibility(View.VISIBLE);
+        rootView.setRefreshing(true);
     }
 
     @Override
     public void hideLoading() {
-        loadingProgress.setVisibility(View.GONE);
+        rootView.setRefreshing(false);
     }
 
     @Override
-    public void showErrorMessage() {
-
+    public void showErrorDataLoadMessage() {
+        showMessageWithRetryLoad(getString(R.string.error_data_load_message));
     }
 
-    @Override
-    public void showNetworkSearchError() {
-
-    }
 
     @Override
     public void showEmptyDataNoNetworkMessage() {
-
+        showMessageWithRetryLoad(getString(R.string.error_empty_data_no_network));
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        unbinder.unbind();
+    }
+
+    private void showMessageWithRetryLoad(String message) {
+        final Snackbar snackbar = Snackbar.make(rootView, message, Snackbar.LENGTH_INDEFINITE);
+        snackbar
+                .setAction(R.string.news_list_fr_snackbar_action_text_retry, view -> {
+                    newsContentPresenter.retryLoad();
+                    snackbar.dismiss();
+                });
+        View snackbarView = snackbar.getView();
+        TextView textView = snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setMaxLines(5);
+        snackbar.show();
     }
 }
 

@@ -2,5 +2,12 @@
     <string name="app_name">News Reader</string>
 
     <string name="fragment_interact_list_impl_error">must implement OnFragmentInteractionListener</string>
+    <string name="news_list_fr_snackbar_action_text_retry">ПОВТОРИТЬ</string>
+    <string name="tv_fr_news_content_modify_text">обновлено :</string>
+    <string name="main_activity_toolbar_title">Тинькофф новости</string>
+    <string name="error_empty_data_no_network">Отсутствует подключение к сети. Отсутствуют сохраненные данные. Проверьте подключение и повторите попытку.</string>
+    <string name="error_saved_data_no_network_essage">Вы видете сохраненные результаты. Отсутствует подключение к сети.Для обновления проверьте подключение и повторите попытку</string>
+    <string name="error_data_load_no_network">Ошибка загрузки данных. Отсутствует подключение к сети.</string>
+    <string name="error_data_load_message">Ошибка загрузки данных.</string>
 
 </resources>

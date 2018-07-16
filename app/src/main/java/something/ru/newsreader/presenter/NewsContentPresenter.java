@@ -5,6 +5,9 @@ import android.annotation.SuppressLint;
 import com.arellomobile.mvp.InjectViewState;
 import com.arellomobile.mvp.MvpPresenter;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import javax.inject.Inject;
 
 import io.reactivex.Scheduler;
@@ -13,17 +16,27 @@ import something.ru.newsreader.model.entity.NewsContent;
 import something.ru.newsreader.model.networkStatus.INetworkStatus;
 import something.ru.newsreader.model.repo.NewsContentRepo;
 import something.ru.newsreader.view.fragment.newsContent.NewsContentView;
+import timber.log.Timber;
+
 
 @InjectViewState
 public class NewsContentPresenter extends MvpPresenter<NewsContentView> {
+    private static final String DATE_FORMAT = "HH:mm dd-MMM-yyyy";
+
     @Inject
     NewsContentRepo newsRepo;
 
+    @Inject
+    INetworkStatus networkStatus;
+
+    private final Scheduler scheduler;
+    private final SimpleDateFormat dateFormat;
+
     private NewsContent currentNews;
-    private Scheduler scheduler;
 
     public NewsContentPresenter(Scheduler scheduler) {
         this.scheduler = scheduler;
+        dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
     }
 
     @Override
@@ -43,27 +56,24 @@ public class NewsContentPresenter extends MvpPresenter<NewsContentView> {
                 .subscribe(newsContent -> {
                     currentNews = newsContent;
                     getViewState().hideLoading();
-
-                    if (newsContent.isEmpty()) {
-                        emptyDataLoaded();
-                    } else {
-                        getViewState().showNewsContent(currentNews.getContent(),
-                                currentNews.getCreationDate(),
-                                currentNews.getLastModificationDate());
-                    }
+                    getViewState().showNewsContent(currentNews.getContent(),
+                            dateFormat.format(currentNews.getLastModificationDate()));
                 }, throwable -> {
-                    getViewState().hideLoading();
-                    getViewState().showErrorMessage();
-                });
+                    Timber.e(throwable);
+                    noDataLoaded();
+                }, this::noDataLoaded);
     }
 
-    private void emptyDataLoaded() {
-        if (INetworkStatus.isOnline()) {
-            getViewState().showNetworkSearchError();
+    public void retryLoad() {
+        getViewState().init();
+    }
+
+    private void noDataLoaded() {
+        getViewState().hideLoading();
+        if (networkStatus.isOnline()) {
+            getViewState().showErrorDataLoadMessage();
         } else {
             getViewState().showEmptyDataNoNetworkMessage();
         }
     }
-
-
 }

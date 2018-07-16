@@ -8,21 +8,15 @@ import something.ru.newsreader.view.mainScreen.MainView;
 @InjectViewState
 public class MainViewPresenter extends MvpPresenter<MainView> {
 
-    private String currentNewsId;
-
     @Override
     protected void onFirstViewAttach() {
         super.onFirstViewAttach();
+        getViewState().init();
         getViewState().showNewsListView();
     }
 
     public void onNewsClick(String newsId) {
-        currentNewsId = newsId;
-        getViewState().showNewsContentView(currentNewsId);
-    }
-
-    public String getCurrentNewsId() {
-        return currentNewsId;
+        getViewState().showNewsContentView(newsId);
     }
 
     public void onBackPressed(boolean isNewsListViewVisible) {

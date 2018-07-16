@@ -39,7 +39,8 @@ public class NewsDeserializer implements JsonDeserializer<News> {
         if (jsonObject.has("publicationDate")) {
             JsonObject pubDateObject = jsonObject.getAsJsonObject("publicationDate");
             if (pubDateObject.has("milliseconds")) {
-                news.setPublicationDate(pubDateObject.get("milliseconds").getAsLong());
+                news.setPublicationDate(DeserializerUtils.createDateFromLong(
+                        pubDateObject.get("milliseconds").getAsLong()));
             } else {
                 throw new JsonParseException(ERROR_JSON_CONTAINS_MEMBER);
             }

@@ -1,31 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/srf_fr_news_content_root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/material_horizontal_padding"
+    android:paddingEnd="@dimen/material_vertical_padding"
+    android:paddingStart="@dimen/material_vertical_padding"
     tools:context=".view.fragment.newsContent.NewsContentFragment">
 
     <ScrollView
+        android:id="@+id/sv_fr_news_content_news_scroll"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingEnd="@dimen/material_vertical_padding"
-        android:paddingStart="@dimen/material_vertical_padding">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tv_fr_news_cont_news_text"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="32dp"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Body2" />
-    </ScrollView>
+            android:orientation="vertical">
 
-    <ProgressBar
-        android:id="@+id/pb_fr_news_cont_news_loading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"/>
-</FrameLayout>
+            <TextView
+                android:id="@+id/tv_fr_news_content_modify_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/tv_fr_news_content_modify_text_pad_Top"
+                android:gravity="end"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:textStyle="italic"
+                android:text="@string/tv_fr_news_content_modify_text"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tv_fr_news_content_news_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/tv_fr_news_content_news_text_pad_top"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Body2" />
+        </LinearLayout>
+    </ScrollView>
+</android.support.v4.widget.SwipeRefreshLayout>
 
 

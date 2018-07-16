@@ -20,32 +20,15 @@ public class RealmDatabaseService implements IDatabaseService {
         return realm
                 .where(News.class)
                 .sort("publicationDate", Sort.DESCENDING)
-                .findAllAsync();
-    }
-
-    @Override
-    public Completable insertOrUpdateNews(List<News> newsList) {
-        return Completable.fromAction(() -> {
-            try (Realm realm = Realm.getDefaultInstance()) {
-                realm.executeTransaction(innerRealm -> {
-                    realm.insertOrUpdate(newsList);
-                });
-            }
-        });
+                .findAll();
     }
 
 
     @Override
-    public Completable insertOrUpdateNewsContent(NewsContent newsContent) {
-        return Completable
-                .create(completableEmitter -> {
-                    try (Realm realm = Realm.getDefaultInstance()) {
-                        realm.executeTransaction(innerRealm -> {
-                            innerRealm.insertOrUpdate(newsContent);
-                        });
-                        completableEmitter.onComplete();
-                    }
-                });
+    public void insertOrUpdateNews(final List<News> newsList) {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            realm.executeTransaction(innerRealm -> realm.insertOrUpdate(createUpdateList(newsList, innerRealm)));
+        }
     }
 
     @Override
@@ -66,33 +49,21 @@ public class RealmDatabaseService implements IDatabaseService {
     }
 
     @Override
-    public Maybe<List<News>> getNewss() {
-        return Maybe.create(emitter -> {
-            Realm realm = Realm.getDefaultInstance();
-            List<News> newsList = realm
-                    .where(News.class)
-                    .sort("publicationDate", Sort.DESCENDING)
-                    .findAll();
-            if (newsList.isEmpty()) {
-                emitter.onComplete();
-            } else emitter.onSuccess(newsList);
-        });
+    public Completable insertOrUpdateNewsContent(NewsContent newsContent) {
+        return Completable
+                .create(completableEmitter -> {
+                    try (Realm realm = Realm.getDefaultInstance()) {
+                        realm.executeTransaction(innerRealm -> innerRealm.insertOrUpdate(newsContent));
+                        completableEmitter.onComplete();
+                    }
+                });
     }
 
-    @Override
-    public void insertOrUpdatgeNews(final List<News> newsList) {
-        try (Realm realm = Realm.getDefaultInstance()) {
-            realm.executeTransaction(innerRealm -> {
-                realm.insertOrUpdate(createUpdateOrInsertList(newsList, innerRealm));
-            });
-        }
-    }
-
-    private List<News> createUpdateOrInsertList(List<News> newsList, Realm innerRealm) {
+    private List<News> createUpdateList(List<News> newsList, Realm innerRealm) {
         RealmResults<News> realmNewsList = innerRealm
                 .where(News.class)
                 .findAll();
-        if (realmNewsList.isEmpty()) {
+        if (realmNewsList.isEmpty() && realmNewsList.isLoaded()) {
             return newsList;
         }
 
@@ -105,7 +76,7 @@ public class RealmDatabaseService implements IDatabaseService {
             if (realmNews == null) {
                 newsToInsertOrUpdate.add(news);
             } else {
-                if (!realmNews.getPublicationDate().equals(news.getPublicationDate())) {
+                if (realmNews.getPublicationDate().before(news.getPublicationDate())) {
                     newsToInsertOrUpdate.add(news);
                 }
             }

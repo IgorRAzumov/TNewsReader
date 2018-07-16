@@ -9,12 +9,12 @@ import something.ru.newsreader.model.database.IDatabaseService;
 import something.ru.newsreader.model.repo.NewsContentRepo;
 import something.ru.newsreader.model.repo.NewsRepo;
 
-@Module(includes = {ApiModule.class, DatabaseModule.class})
+@Module(includes = {ApiModule.class, DatabaseModule.class, NetworkStatusModule.class})
 public class RepoModule {
 
     @Singleton
     @Provides
-    public NewsRepo repo(IApiService apiService, IDatabaseService databaseService) {
+    public NewsRepo newsRepo(IApiService apiService, IDatabaseService databaseService) {
         return new NewsRepo(apiService, databaseService);
     }
 

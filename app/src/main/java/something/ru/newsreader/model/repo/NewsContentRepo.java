@@ -1,13 +1,14 @@
 package something.ru.newsreader.model.repo;
 
 import io.reactivex.Maybe;
-import io.reactivex.Single;
 import something.ru.newsreader.model.api.IApiService;
 import something.ru.newsreader.model.database.IDatabaseService;
 import something.ru.newsreader.model.entity.ApiResponse;
 import something.ru.newsreader.model.entity.NewsContent;
+import timber.log.Timber;
 
-public class NewsContentRepo implements INetworkContentRepo {
+
+public class NewsContentRepo {
     private final IApiService apiService;
     private final IDatabaseService databaseService;
 
@@ -16,25 +17,22 @@ public class NewsContentRepo implements INetworkContentRepo {
         this.databaseService = databaseService;
     }
 
-    @Override
-    public Single<NewsContent> getNewsContent(String newsId) {
-        Maybe<NewsContent> remoteData = apiService
+    public Maybe<NewsContent> getNewsContent(String newsId) {
+        Maybe<NewsContent> local = databaseService
+                .getNewsContent(newsId)
+                .filter(newsContent -> newsContent.isLoaded());
+
+        return apiService
                 .getNewsContent(newsId)
                 .filter(newsContentApiResponse -> newsContentApiResponse.getResultCode().equals("OK"))
                 .map(ApiResponse::getPayload)
                 .doOnSuccess(newsContent -> databaseService
                         .insertOrUpdateNewsContent(newsContent)
-                        .subscribe());
-
-        Maybe<NewsContent> localData = databaseService
-                .getNewsContent(newsId)
-                .filter(newsContent -> newsContent.isLoaded())
-                .doOnError(throwable -> {
-                    //logging  local error
-                });
-
-        return Maybe
-                .concat(remoteData, localData)
-                .first(new NewsContent());
+                        .subscribe())
+                .onErrorResumeNext(throwable -> {
+                    Timber.e(throwable);
+                    return local;
+                })
+                .switchIfEmpty(local);
     }
 }

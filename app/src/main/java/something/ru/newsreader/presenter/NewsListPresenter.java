@@ -5,11 +5,13 @@ import android.annotation.SuppressLint;
 import com.arellomobile.mvp.InjectViewState;
 import com.arellomobile.mvp.MvpPresenter;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
 import io.reactivex.Scheduler;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.OrderedCollectionChangeSet;
 import io.realm.OrderedRealmCollectionChangeListener;
@@ -19,41 +21,49 @@ import something.ru.newsreader.model.networkStatus.INetworkStatus;
 import something.ru.newsreader.model.repo.NewsRepo;
 import something.ru.newsreader.view.adapters.INewsRowView;
 import something.ru.newsreader.view.fragment.newsList.NewsListView;
+import timber.log.Timber;
 
 @InjectViewState
 public class NewsListPresenter extends MvpPresenter<NewsListView> implements INewsListPresenter {
+    private static final String DATE_FORMAT = "HH:mm dd-MMM-yyyy";
+    private static final int NO_SAVED_POSITION = -1;
+
     @Inject
     NewsRepo newsRepo;
+    @Inject
+    INetworkStatus networkStatus;
 
-    private RealmResults<News> newsRealmResults;
     private final Scheduler scheduler;
     private final OrderedRealmCollectionChangeListener<RealmResults<News>> listener;
-    private AtomicBoolean isDataUpdating;
+    private final SimpleDateFormat dateFormat;
+    private int savedNewsPosition;
+    private RealmResults<News> newsRealmResults;
+    private Disposable disposable;
 
     public NewsListPresenter(Scheduler scheduler) {
         this.scheduler = scheduler;
         listener = createListener();
-        isDataUpdating = new AtomicBoolean();
-        isDataUpdating.set(false);
+        savedNewsPosition = NO_SAVED_POSITION;
+        dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
     }
-
 
     @Override
     protected void onFirstViewAttach() {
         super.onFirstViewAttach();
         getViewState().init();
-        getViewState().showLoading();
-        loasdNews();
+        loadNews();
     }
 
-
     @SuppressLint("CheckResult")
-    private void loasdNews() {
+    private void loadNews() {
+        getViewState().showLoading();
         newsRepo
                 .getAllNews()
+                .observeOn(scheduler)
+                .filter(RealmResults::isLoaded)
                 .subscribe(news -> {
                     newsRealmResults = news;
-                    boolean isOnline = INetworkStatus.isOnline();
+                    boolean isOnline = networkStatus.isOnline();
 
                     if (newsRealmResults.isEmpty()) {
                         if (!isOnline) {
@@ -65,49 +75,62 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
                     } else {
                         getViewState().hideLoading();
                         if (!isOnline) {
-                            getViewState().showNoNetworkForUpdateMessage();
+                            getViewState().showSavedDataNoNetworkMessage();
                         } else {
                             updateNews();
                         }
                     }
                 }, throwable -> {
+                    Timber.e(throwable);
+
                     getViewState().hideLoading();
-                    if (!INetworkStatus.isOnline()) {
-                        getViewState().showErrorMessageWithNoNetwork();
+                    if (networkStatus.isOnline()) {
+                        getViewState().showErrorDataLoadNoNetworkMessage();
                     } else {
-                        getViewState().showErrorMessage();
+                        getViewState().showErrorDataLoadMessage();
                     }
                 });
     }
 
-    /*addNewsRealResultListener();*/
     @SuppressLint("CheckResult")
-    private void updateNews() {
+    public void updateNews() {
         newsRealmResults.removeAllChangeListeners();
         addNewsRealResultListener();
-        isDataUpdating.set(true);
 
-        newsRepo
-                .updateNNNews()
-                .subscribeOn(Schedulers.io())
-                .observeOn(scheduler)
-                .subscribe(() -> {
-                    isDataUpdating.set(false);
-                    getViewState().hideLoading();
-                }, throwable -> {
-                    isDataUpdating.set(false);
-                    getViewState().hideLoading();
-                    getViewState().showErrorUpdateNewsMessage();
-                });
+        disposable =
+                newsRepo
+                        .updateNews()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(scheduler)
+                        .subscribe(() -> getViewState().hideLoading(), throwable -> {
+                            Timber.e(throwable);
+
+                            getViewState().hideLoading();
+                            if (newsRealmResults != null && !newsRealmResults.isEmpty()) {
+                                getViewState().showSavedDataNoNetworkMessage();
+                            } else {
+                                getViewState().showErrorDataLoadNoNetworkMessage();
+                            }
+                        });
     }
 
+    public void saveNewsPosition(int position) {
+        savedNewsPosition = position;
+    }
+
+    public void viewOnResume() {
+        if (savedNewsPosition != NO_SAVED_POSITION) {
+            getViewState().restoreViewState(savedNewsPosition);
+            savedNewsPosition = NO_SAVED_POSITION;
+        }
+    }
 
     @Override
     public void bindNewsListRow(int position, INewsRowView rowView) {
         News news = newsRealmResults.get(position);
         if (news != null) {
             rowView.setNewsText(news.getText());
-            rowView.setPublishDate(String.valueOf(news.getPublicationDate()));
+            rowView.setPublishDate(dateFormat.format(news.getPublicationDate()));
         }
     }
 
@@ -138,30 +161,19 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
                 : newsRealmResults.size();
     }
 
+    public void retryLoad() {
+        if (disposable != null && !disposable.isDisposed()) {
+            disposable.dispose();
+        }
 
-    private OrderedRealmCollectionChangeListener<RealmResults<News>> createListener() {
-        return (news, changeSet) -> {
-            if (changeSet == null) {
-                getViewState().notifyNewDataChanged();
-                return;
-            }
-
-            OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
-            for (int i = deletions.length - 1; i >= 0; i--) {
-                OrderedCollectionChangeSet.Range range = deletions[i];
-               getViewState().notifyNewsRemoved(range.startIndex, range.length);
-            }
-
-            OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
-            for (OrderedCollectionChangeSet.Range range : insertions) {
-               getViewState().notifyItemRangeInserted(range.startIndex, range.length);
-            }
-
-            OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
-            for (OrderedCollectionChangeSet.Range range : modifications) {
-                getViewState().notifyNewsChanged(range.startIndex, range.length);
-            }
-        };
+        boolean fullReload = newsRealmResults != null && newsRealmResults.isValid() &&
+                !newsRealmResults.isEmpty();
+        if (!fullReload) {
+            loadNews();
+        } else {
+            updateNews();
+            getViewState().showLoading();
+        }
     }
 
     private void addNewsRealResultListener() {
@@ -174,13 +186,28 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
         }
     }
 
+    private OrderedRealmCollectionChangeListener<RealmResults<News>> createListener() {
+        return (news, changeSet) -> {
+            if (changeSet == null) {
+                getViewState().notifyNewDataChanged();
+                return;
+            }
 
-    public void retryLoad() {
-        if (!isDataUpdating.get()) {
-        }
-    }
+            OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
+            for (int i = deletions.length - 1; i >= 0; i--) {
+                OrderedCollectionChangeSet.Range range = deletions[i];
+                getViewState().notifyNewsRemoved(range.startIndex, range.length);
+            }
 
-    public void exitButtonClick() {
-        getViewState().exitFromApp();
+            OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
+            for (OrderedCollectionChangeSet.Range range : insertions) {
+                getViewState().notifyItemRangeInserted(range.startIndex, range.length);
+            }
+
+            OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
+            for (OrderedCollectionChangeSet.Range range : modifications) {
+                getViewState().notifyNewsChanged(range.startIndex, range.length);
+            }
+        };
     }
 }
