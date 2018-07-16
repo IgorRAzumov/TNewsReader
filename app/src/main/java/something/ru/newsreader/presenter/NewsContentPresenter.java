@@ -56,7 +56,6 @@ public class NewsContentPresenter extends MvpPresenter<NewsContentView> {
                 .observeOn(scheduler)
                 .subscribe(newsContent -> {
                     currentNews = newsContent;
-
                     getViewState().hideLoading();
                     getViewState().showNewsContent(currentNews.getContent(),
                             dateFormat.format(currentNews.getLastModificationDate()));

@@ -69,14 +69,14 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
                         if (!isOnline) {
                             getViewState().hideLoading();
                             getViewState().showEmptyDataNoNetworkMessage();
-                        } else {
-                            updateNews();
                         }
                     } else {
                         getViewState().hideLoading();
                         if (!isOnline) {
                             getViewState().showSavedDataNoNetworkMessage();
-                        } else {
+                        }
+
+                        if (isOnline) {
                             updateNews();
                         }
                     }

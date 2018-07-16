@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 
 import java.lang.reflect.Type;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Named;
 
@@ -25,6 +26,7 @@ import something.ru.newsreader.model.entity.NewsContent;
 @Module
 public class ApiModule {
     private static final String BASE_URL = "https://api.tinkoff.ru/v1/";
+    private static final int CONNECTION_TIMEOUT_SEC = 3;
 
     @Provides
     public IApiService api(Retrofit retrofit) {
@@ -33,7 +35,7 @@ public class ApiModule {
 
     @Provides
     public Retrofit retrofit(String baseUrl,
-                             @Named("interceptOkHttp") OkHttpClient client,
+                             @Named("defaultOkHttp") OkHttpClient client,
                              RxJava2CallAdapterFactory rxJava2CallAdapterFactory,
                              GsonConverterFactory gsonConverterFactory) {
         return new Retrofit.Builder()
@@ -53,6 +55,7 @@ public class ApiModule {
     @Provides
     public OkHttpClient defOkHttpClient() {
         return new OkHttpClient.Builder()
+                .connectTimeout(CONNECTION_TIMEOUT_SEC, TimeUnit.SECONDS)
                 .build();
     }
 
@@ -61,6 +64,7 @@ public class ApiModule {
     public OkHttpClient intOkHttpClient(HttpLoggingInterceptor loggingInterceptor) {
         return new OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
+                .connectTimeout(CONNECTION_TIMEOUT_SEC, TimeUnit.SECONDS)
                 .build();
     }
 
