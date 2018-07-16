@@ -1,7 +1,6 @@
 package something.ru.newsreader.view.fragment.newsList;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -179,9 +178,7 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
     }
 
     private void initRefreshLayout() {
-        Resources resources = getResources();
-        Resources.Theme theme = getActivity().getTheme();
-        swipeRefreshLayout.setOnRefreshListener(() -> newsListPresenter.updateNews());
+        swipeRefreshLayout.setOnRefreshListener(() -> newsListPresenter.retryLoad());
         swipeRefreshLayout.setColorSchemeResources(R.color.blue_600, R.color.red_600,
                 R.color.green_600, R.color.orange_600);
     }

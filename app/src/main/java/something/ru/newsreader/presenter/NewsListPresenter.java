@@ -82,14 +82,17 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
                     }
                 }, throwable -> {
                     Timber.e(throwable);
+                    noDataLoaded();
+                }, this::noDataLoaded);
+    }
 
-                    getViewState().hideLoading();
-                    if (networkStatus.isOnline()) {
-                        getViewState().showErrorDataLoadNoNetworkMessage();
-                    } else {
-                        getViewState().showErrorDataLoadMessage();
-                    }
-                });
+    private void noDataLoaded() {
+        getViewState().hideLoading();
+        if (networkStatus.isOnline()) {
+            getViewState().showErrorDataLoadNoNetworkMessage();
+        } else {
+            getViewState().showErrorDataLoadMessage();
+        }
     }
 
     @SuppressLint("CheckResult")
@@ -102,16 +105,16 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
                         .updateNews()
                         .subscribeOn(Schedulers.io())
                         .observeOn(scheduler)
-                        .subscribe(() -> getViewState().hideLoading(), throwable -> {
-                            Timber.e(throwable);
-
-                            getViewState().hideLoading();
-                            if (newsRealmResults != null && !newsRealmResults.isEmpty()) {
-                                getViewState().showSavedDataNoNetworkMessage();
-                            } else {
-                                getViewState().showErrorDataLoadNoNetworkMessage();
-                            }
-                        });
+                        .subscribe(() -> getViewState().hideLoading(),
+                                throwable -> {
+                                    Timber.e(throwable);
+                                    getViewState().hideLoading();
+                                    if (newsRealmResults != null && !newsRealmResults.isEmpty()) {
+                                        getViewState().showSavedDataNoNetworkMessage();
+                                    } else {
+                                        getViewState().showErrorDataLoadNoNetworkMessage();
+                                    }
+                                });
     }
 
     public void viewOnPause(int position) {
@@ -166,7 +169,6 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
         if (disposable != null && !disposable.isDisposed()) {
             disposable.dispose();
         }
-
         boolean fullReload = newsRealmResults != null && newsRealmResults.isValid() &&
                 !newsRealmResults.isEmpty();
         if (!fullReload) {

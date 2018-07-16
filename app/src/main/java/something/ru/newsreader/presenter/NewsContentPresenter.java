@@ -50,7 +50,6 @@ public class NewsContentPresenter extends MvpPresenter<NewsContentView> {
     @SuppressLint("CheckResult")
     public void loadNewsContent() {
         getViewState().showLoading();
-
         newsRepo
                 .getNewsContent(newsId)
                 .subscribeOn(Schedulers.io())
@@ -62,14 +61,9 @@ public class NewsContentPresenter extends MvpPresenter<NewsContentView> {
                     getViewState().showNewsContent(currentNews.getContent(),
                             dateFormat.format(currentNews.getLastModificationDate()));
                 }, throwable -> {
-                    getViewState().hideLoading();
                     Timber.e(throwable);
                     noDataLoaded();
-                }, () -> {
-                    getViewState().hideLoading();
-                    noDataLoaded();
-
-                });
+                }, this::noDataLoaded);
     }
 
     public void viewOnPause() {

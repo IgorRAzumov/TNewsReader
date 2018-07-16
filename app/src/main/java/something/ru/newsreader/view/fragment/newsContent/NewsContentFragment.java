@@ -124,7 +124,6 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
         }
     }
 
-
     @Override
     public void showEmptyDataNoNetworkMessage() {
         showMessageWithRetryLoad(getString(R.string.error_empty_data_no_network));
