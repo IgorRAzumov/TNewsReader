@@ -7,27 +7,30 @@ import com.arellomobile.mvp.viewstate.strategy.SkipStrategy;
 import com.arellomobile.mvp.viewstate.strategy.StateStrategyType;
 
 
-@StateStrategyType(AddToEndSingleStrategy.class)
+
 public interface NewsListView extends MvpView{
+    @StateStrategyType(AddToEndSingleStrategy.class)
     void init();
 
+    @StateStrategyType(AddToEndSingleStrategy.class)
     void showLoading();
 
+    @StateStrategyType(AddToEndSingleStrategy.class)
     void hideLoading();
 
     @StateStrategyType(OneExecutionStateStrategy.class)
     void showNewsContent(String newsId);
 
-    @StateStrategyType(SkipStrategy.class)
+
     void notifyNewDataChanged();
 
-    @StateStrategyType(SkipStrategy.class)
+
     void notifyItemRangeInserted(int startIndex, int length);
 
-    @StateStrategyType(SkipStrategy.class)
+
     void notifyNewsRemoved(int startIndex, int length);
 
-    @StateStrategyType(SkipStrategy.class)
+
     void notifyNewsChanged(int startIndex, int length);
 
     @StateStrategyType(OneExecutionStateStrategy.class)

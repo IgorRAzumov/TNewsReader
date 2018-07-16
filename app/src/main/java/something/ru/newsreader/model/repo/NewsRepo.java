@@ -36,7 +36,10 @@ public class NewsRepo {
                             databaseService.insertOrUpdateNews(apiResponse.getPayload());
                             emitter.onComplete();
                         }
-                        , Timber::e
+                        , throwable -> {
+                            Timber.e(throwable);
+                            emitter.onError(throwable);
+                        }
                         , () -> emitter.onError(new RuntimeException(NO_RESULTS_ERROR))));
     }
 }

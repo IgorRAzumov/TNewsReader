@@ -63,8 +63,8 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
                 .filter(RealmResults::isLoaded)
                 .subscribe(news -> {
                     newsRealmResults = news;
-                    boolean isOnline = networkStatus.isOnline();
 
+                    boolean isOnline = networkStatus.isOnline();
                     if (newsRealmResults.isEmpty()) {
                         if (!isOnline) {
                             getViewState().hideLoading();
@@ -75,11 +75,9 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
                         if (!isOnline) {
                             getViewState().showSavedDataNoNetworkMessage();
                         }
-
-                        if (isOnline) {
-                            updateNews();
-                        }
                     }
+
+                    updateNews();
                 }, throwable -> {
                     Timber.e(throwable);
                     noDataLoaded();
@@ -105,7 +103,8 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
                         .updateNews()
                         .subscribeOn(Schedulers.io())
                         .observeOn(scheduler)
-                        .subscribe(() -> getViewState().hideLoading(),
+                        .subscribe(() ->
+                                        getViewState().hideLoading(),
                                 throwable -> {
                                     Timber.e(throwable);
                                     getViewState().hideLoading();
@@ -166,16 +165,20 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
     }
 
     public void retryLoad() {
+        if (!networkStatus.isOnline()) {
+            getViewState().hideLoading();
+            getViewState().showErrorDataLoadMessage();
+            return;
+        }
+
         if (disposable != null && !disposable.isDisposed()) {
             disposable.dispose();
         }
-        boolean fullReload = newsRealmResults != null && newsRealmResults.isValid() &&
-                !newsRealmResults.isEmpty();
-        if (!fullReload) {
-            loadNews();
-        } else {
+        if (newsRealmResults != null && newsRealmResults.isValid() &&
+                !newsRealmResults.isEmpty())
             updateNews();
-            getViewState().showLoading();
+        else {
+            loadNews();
         }
     }
 

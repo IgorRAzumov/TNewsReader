@@ -205,10 +205,11 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
         snackbar = Snackbar.make(swipeRefreshLayout, message, duration);
         snackbar
                 .setAction(R.string.news_list_fr_snackbar_action_text_retry, view -> {
-                    newsListPresenter.retryLoad();
                     snackbar.dismiss();
+                    newsListPresenter.retryLoad();
                 });
         View snackbarView = snackbar.getView();
+        snackbarView.setBackgroundColor(getResources().getColor(R.color.orange_600));
         TextView textView = snackbarView.findViewById(android.support.design.R.id.snackbar_text);
         textView.setMaxLines(getResources().getInteger(R.integer.snackbar_max_lines));
         snackbar.show();

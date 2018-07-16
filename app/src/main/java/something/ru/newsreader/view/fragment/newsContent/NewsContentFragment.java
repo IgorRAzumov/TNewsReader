@@ -144,6 +144,7 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
                     snackbar.dismiss();
                 });
         View snackbarView = snackbar.getView();
+        snackbarView.setBackgroundColor(getResources().getColor(R.color.orange_600));
         TextView textView = snackbarView.findViewById(android.support.design.R.id.snackbar_text);
         textView.setMaxLines(getResources().getInteger(R.integer.snackbar_max_lines));
         snackbar.show();
