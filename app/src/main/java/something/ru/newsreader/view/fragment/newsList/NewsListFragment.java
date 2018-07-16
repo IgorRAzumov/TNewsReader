@@ -25,6 +25,7 @@ import something.ru.newsreader.App;
 import something.ru.newsreader.R;
 import something.ru.newsreader.presenter.NewsListPresenter;
 import something.ru.newsreader.view.adapters.NewsListAdapter;
+import timber.log.Timber;
 
 
 public class NewsListFragment extends MvpAppCompatFragment implements NewsListView {
@@ -62,8 +63,10 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
         if (context instanceof OnFragmentInteractionListener) {
             onFragmentInteractionListener = (OnFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context.toString()
+            RuntimeException exception = new RuntimeException(context.toString()
                     + getString(R.string.fragment_interact_list_impl_error));
+            Timber.e(exception);
+            throw exception;
         }
     }
 

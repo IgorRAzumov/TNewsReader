@@ -60,7 +60,7 @@ public class NewsRepoInstrumentedTest {
     }
 
     @Test
-    public void getArticles() {
+    public void loadAllNews() {
         mockWebServer.enqueue(createNewsResponse());
         TestObserver<NewsContent> newsContentObserver = new TestObserver<>();
         newsContentRepo.getNewsContent(NEWS_ID).subscribe(newsContentObserver);

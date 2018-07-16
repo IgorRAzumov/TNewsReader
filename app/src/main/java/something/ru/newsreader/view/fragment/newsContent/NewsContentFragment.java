@@ -24,6 +24,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import something.ru.newsreader.App;
 import something.ru.newsreader.R;
 import something.ru.newsreader.presenter.NewsContentPresenter;
+import timber.log.Timber;
 
 
 @StateStrategyType(AddToEndSingleStrategy.class)
@@ -46,7 +47,16 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
 
     @ProvidePresenter
     public NewsContentPresenter provideNewsContentPresenter() {
-        NewsContentPresenter presenter = new NewsContentPresenter(AndroidSchedulers.mainThread());
+        Bundle args = getArguments();
+        if (args == null) {
+            RuntimeException exception
+                    = new RuntimeException("news content fragment arguments be not null");
+            Timber.e(exception);
+            throw exception;
+        }
+
+        NewsContentPresenter presenter = new NewsContentPresenter(AndroidSchedulers.mainThread(),
+                args.getString(NEWS_ID_BUNDLE_KEY));
         App.getInstance().getAppComponent().inject(presenter);
         return presenter;
     }
@@ -74,13 +84,6 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
     @Override
     public void init() {
         rootView.setEnabled(false);
-
-        Bundle args = getArguments();
-        if (args != null) {
-            newsContentPresenter.getNewsContent(args.getString(NEWS_ID_BUNDLE_KEY));
-        } else {
-            throw new RuntimeException();
-        }
     }
 
     @Override
@@ -121,7 +124,7 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
         final Snackbar snackbar = Snackbar.make(rootView, message, Snackbar.LENGTH_INDEFINITE);
         snackbar
                 .setAction(R.string.news_list_fr_snackbar_action_text_retry, view -> {
-                    newsContentPresenter.retryLoad();
+                    newsContentPresenter.loadNewsContent();
                     snackbar.dismiss();
                 });
         View snackbarView = snackbar.getView();

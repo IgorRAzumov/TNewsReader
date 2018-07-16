@@ -7,11 +7,13 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Maybe;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
+import something.ru.newsreader.di.DaggerTestComponent;
 import something.ru.newsreader.di.TestComponent;
 import something.ru.newsreader.di.modules.TestRepoModule;
 import something.ru.newsreader.model.entity.NewsContent;
@@ -40,7 +42,7 @@ public class NewsContentPresenterUnitTest {
         MockitoAnnotations.initMocks(this);
         RxJavaPlugins.setIoSchedulerHandler(schedulerCallable -> Schedulers.trampoline());
         testScheduler = new TestScheduler();
-        presenter = Mockito.spy(new NewsContentPresenter(testScheduler));
+        presenter = Mockito.spy(new NewsContentPresenter(testScheduler, NEWS_ID));
     }
 
     @Test
@@ -52,6 +54,11 @@ public class NewsContentPresenterUnitTest {
 
     @Test
     public void showNewsContent() {
+        injectNewsContent(provideTestNewsContent());
+        presenter.attachView(newsContentView);
+        testScheduler.advanceTimeBy(SCHEDULER_SEC_DELAY, TimeUnit.SECONDS);
+        Mockito.verify(newsContentView).showLoading();
+        Mockito.verify(newsContentView).hideLoading();
 
     }
 

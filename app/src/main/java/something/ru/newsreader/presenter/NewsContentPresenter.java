@@ -29,44 +29,49 @@ public class NewsContentPresenter extends MvpPresenter<NewsContentView> {
     @Inject
     INetworkStatus networkStatus;
 
-    private final Scheduler scheduler;
+    private final String newsId;
     private final SimpleDateFormat dateFormat;
-
     private NewsContent currentNews;
+    private final Scheduler scheduler;
 
-    public NewsContentPresenter(Scheduler scheduler) {
+    public NewsContentPresenter(Scheduler scheduler, String newsId) {
         this.scheduler = scheduler;
         dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
+        this.newsId = newsId;
     }
 
     @Override
     protected void onFirstViewAttach() {
         super.onFirstViewAttach();
         getViewState().init();
+        loadNewsContent();
     }
 
     @SuppressLint("CheckResult")
-    public void getNewsContent(String currentNewsId) {
+    public void loadNewsContent() {
         getViewState().showLoading();
 
         newsRepo
-                .getNewsContent(currentNewsId)
+                .getNewsContent(newsId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(scheduler)
                 .subscribe(newsContent -> {
                     currentNews = newsContent;
+
                     getViewState().hideLoading();
                     getViewState().showNewsContent(currentNews.getContent(),
                             dateFormat.format(currentNews.getLastModificationDate()));
                 }, throwable -> {
+                    getViewState().hideLoading();
                     Timber.e(throwable);
                     noDataLoaded();
-                }, this::noDataLoaded);
+                }, () -> {
+                    getViewState().hideLoading();
+                    noDataLoaded();
+
+                });
     }
 
-    public void retryLoad() {
-        getViewState().init();
-    }
 
     private void noDataLoaded() {
         getViewState().hideLoading();
