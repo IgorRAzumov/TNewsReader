@@ -65,10 +65,6 @@ public class NewsContentPresenter extends MvpPresenter<NewsContentView> {
                 }, this::noDataLoaded);
     }
 
-    public void viewOnPause() {
-        getViewState().clearMessages();
-    }
-
     private void noDataLoaded() {
         getViewState().hideLoading();
         if (networkStatus.isOnline()) {

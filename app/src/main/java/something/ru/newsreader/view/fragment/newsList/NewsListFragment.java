@@ -11,7 +11,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.arellomobile.mvp.MvpAppCompatFragment;
 import com.arellomobile.mvp.presenter.InjectPresenter;
@@ -24,6 +23,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import something.ru.newsreader.App;
 import something.ru.newsreader.R;
 import something.ru.newsreader.presenter.NewsListPresenter;
+import something.ru.newsreader.view.UiUtils;
 import something.ru.newsreader.view.adapters.NewsListAdapter;
 import timber.log.Timber;
 
@@ -177,6 +177,21 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
         unbinder.unbind();
     }
 
+    @Override
+    public void clearMessages() {
+        if (snackbar != null && snackbar.isShownOrQueued()) {
+            snackbar.dismiss();
+        }
+    }
+
+    private void showMessageWithRetryLoad(String message, int duration) {
+        clearMessages();
+        snackbar = UiUtils.createSnackbar(duration, message,
+                getString(R.string.news_list_fr_snackbar_action_text_retry),
+                swipeRefreshLayout, v -> newsListPresenter.retryLoad());
+        snackbar.show();
+    }
+
     private void initRefreshLayout() {
         swipeRefreshLayout.setOnRefreshListener(() -> newsListPresenter.retryLoad());
         swipeRefreshLayout.setColorSchemeResources(R.color.blue_600, R.color.red_600,
@@ -191,28 +206,6 @@ public class NewsListFragment extends MvpAppCompatFragment implements NewsListVi
         newsRecycler.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
         newsListAdapter = new NewsListAdapter(newsListPresenter);
         newsRecycler.setAdapter(newsListAdapter);
-    }
-
-    @Override
-    public void clearMessages() {
-        if (snackbar != null && snackbar.isShownOrQueued()) {
-            snackbar.dismiss();
-        }
-    }
-
-    private void showMessageWithRetryLoad(String message, int duration) {
-        clearMessages();
-        snackbar = Snackbar.make(swipeRefreshLayout, message, duration);
-        snackbar
-                .setAction(R.string.news_list_fr_snackbar_action_text_retry, view -> {
-                    snackbar.dismiss();
-                    newsListPresenter.retryLoad();
-                });
-        View snackbarView = snackbar.getView();
-        snackbarView.setBackgroundColor(getResources().getColor(R.color.orange_600));
-        TextView textView = snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-        textView.setMaxLines(getResources().getInteger(R.integer.snackbar_max_lines));
-        snackbar.show();
     }
 
     public interface OnFragmentInteractionListener {

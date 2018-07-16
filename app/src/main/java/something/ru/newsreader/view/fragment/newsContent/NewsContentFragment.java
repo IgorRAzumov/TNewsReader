@@ -24,6 +24,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import something.ru.newsreader.App;
 import something.ru.newsreader.R;
 import something.ru.newsreader.presenter.NewsContentPresenter;
+import something.ru.newsreader.view.UiUtils;
 import timber.log.Timber;
 
 
@@ -83,12 +84,6 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        newsContentPresenter.viewOnPause();
-    }
-
-    @Override
     public void init() {
         swipeRefreshLayout.setColorSchemeResources(R.color.blue_600, R.color.red_600,
                 R.color.green_600, R.color.orange_600);
@@ -114,7 +109,8 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
 
     @Override
     public void showErrorDataLoadMessage() {
-        showMessageWithRetryLoad(getString(R.string.error_data_load_message));
+        showMessageWithRetryLoad(getString(R.string.error_data_load_message)
+                , Snackbar.LENGTH_INDEFINITE);
     }
 
     @Override
@@ -126,7 +122,8 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
 
     @Override
     public void showEmptyDataNoNetworkMessage() {
-        showMessageWithRetryLoad(getString(R.string.error_empty_data_no_network));
+        showMessageWithRetryLoad(getString(R.string.error_empty_data_no_network),
+                Snackbar.LENGTH_INDEFINITE);
     }
 
     @Override
@@ -135,18 +132,11 @@ public class NewsContentFragment extends MvpAppCompatFragment implements NewsCon
         unbinder.unbind();
     }
 
-    private void showMessageWithRetryLoad(String message) {
+    private void showMessageWithRetryLoad(String message, int duration) {
         clearMessages();
-        snackbar = Snackbar.make(swipeRefreshLayout, message, Snackbar.LENGTH_INDEFINITE);
-        snackbar
-                .setAction(R.string.news_list_fr_snackbar_action_text_retry, view -> {
-                    newsContentPresenter.loadNewsContent();
-                    snackbar.dismiss();
-                });
-        View snackbarView = snackbar.getView();
-        snackbarView.setBackgroundColor(getResources().getColor(R.color.orange_600));
-        TextView textView = snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-        textView.setMaxLines(getResources().getInteger(R.integer.snackbar_max_lines));
+        snackbar = UiUtils.createSnackbar(duration, message,
+                getString(R.string.news_list_fr_snackbar_action_text_retry),
+                swipeRefreshLayout, v -> newsContentPresenter.loadNewsContent());
         snackbar.show();
     }
 }

@@ -76,8 +76,9 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
                             getViewState().showSavedDataNoNetworkMessage();
                         }
                     }
-
-                    updateNews();
+                    if (isOnline) {
+                        updateNews();
+                    }
                 }, throwable -> {
                     Timber.e(throwable);
                     noDataLoaded();
@@ -94,7 +95,7 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
     }
 
     @SuppressLint("CheckResult")
-    public void updateNews() {
+    private void updateNews() {
         newsRealmResults.removeAllChangeListeners();
         addNewsRealResultListener();
 
@@ -167,6 +168,7 @@ public class NewsListPresenter extends MvpPresenter<NewsListView> implements INe
     public void retryLoad() {
         if (!networkStatus.isOnline()) {
             getViewState().hideLoading();
+
             getViewState().showErrorDataLoadMessage();
             return;
         }
